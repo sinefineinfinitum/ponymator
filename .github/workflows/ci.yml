@@ -35,14 +35,24 @@ jobs:
             composer-${{ runner.os }}-php${{ matrix.php }}-
 
       - name: Install dependencies
+        if: matrix.php != '8.0'
         run: composer install --no-interaction --prefer-dist
+
+      - name: Install dependencies for PHP 8.0
+        if: matrix.php == '8.0'
+        run: COMPOSER=composer-php80.json composer update --no-interaction --no-progress --prefer-dist
 
       - name: PHPStan
         run: vendor/bin/phpstan analyse -c phpstan.neon --memory-limit 1G --no-progress --error-format=checkstyle | cs2pr
         continue-on-error: true
 
       - name: PHPUnit
+        if: matrix.php != '8.0'
         run: vendor/bin/phpunit -c phpunit.xml.dist
+
+      - name: PHPUnit on PHP 8.0
+        if: matrix.php == '8.0'
+        run: COMPOSER=composer-php80.json vendor/bin/phpunit
 
       - name: PHP CodeSniffer
         run: vendor/bin/phpcs -s  --standard=phpcs.xml.dist

@@ -21,10 +21,5 @@
         "phpunit/phpunit": "^10.5.0",
         "phpstan/phpstan": "^2.2",
         "squizlabs/php_codesniffer": "^4.0"
-    },
-    "config": {
-        "audit": {
-            "ignore": ["PKSA-z3gr-8qht-p93v"]
-        }
     }
 }
