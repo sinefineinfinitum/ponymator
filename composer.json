@@ -1,0 +1,19 @@
+{
+    "name": "phpstan/ponimator",
+    "description": "Ponimator - generate docs for php project",
+    "license": ["MIT"],
+    "keywords": ["docs", "analysis"],
+    "bin": [
+        "ponimator",
+        "ponimator.phar"
+    ],
+    "require": {
+        "php": "^8.0",
+        "nikic/php-parser": "^5.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "SineFine\\Ponimator\\": "src/"
+        }
+    }
+}

@@ -1,0 +1,12 @@
+#!/usr/bin/env php
+<?php
+/**
+ * Ponimator - generate docs for php project
+ *
+ */
+
+require_once __DIR__.'/../autoload.php';
+
+$runner   = new SineFine\Ponimator\Ponimator();
+$runner->run();
+

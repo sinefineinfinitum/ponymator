@@ -1,0 +1,6 @@
+*.phar
+vendor
+.idea
+.opencode
+.specify
+specs
