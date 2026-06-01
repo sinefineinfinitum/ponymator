@@ -25,32 +25,6 @@ final class HashComparatorTest extends TestCase
         }
     }
 
-    public function testComputeHashReturnsString(): void
-    {
-        $path = $this->tempDir . '/test.php';
-        file_put_contents($path, '<?php echo "hello";');
-        $hash = $this->comparator->computeHash($path);
-        $this->assertSame(64, strlen($hash));
-    }
-
-    public function testSameContentSameHash(): void
-    {
-        $a = $this->tempDir . '/a.php';
-        $b = $this->tempDir . '/b.php';
-        file_put_contents($a, 'same content');
-        file_put_contents($b, 'same content');
-        $this->assertSame($this->comparator->computeHash($a), $this->comparator->computeHash($b));
-    }
-
-    public function testDifferentContentDifferentHash(): void
-    {
-        $a = $this->tempDir . '/a.php';
-        $b = $this->tempDir . '/b.php';
-        file_put_contents($a, 'content a');
-        file_put_contents($b, 'content b');
-        $this->assertNotSame($this->comparator->computeHash($a), $this->comparator->computeHash($b));
-    }
-
     public function testExtractStoredHashReturnsNullForMissingFile(): void
     {
         $this->assertNull($this->comparator->extractStoredHash('/nonexistent.md'));
@@ -66,34 +40,7 @@ final class HashComparatorTest extends TestCase
     public function testExtractStoredHashReturnsHash(): void
     {
         $path = $this->tempDir . '/test.md';
-        file_put_contents($path, "---\nsource_hash: abc123\n---\n# Doc");
-        $this->assertSame('abc123', $this->comparator->extractStoredHash($path));
-    }
-
-    public function testHasChangedReturnsTrueForMissingDoc(): void
-    {
-        $src = $this->tempDir . '/source.php';
-        file_put_contents($src, '<?php');
-        $this->assertTrue($this->comparator->hasChanged($src, '/nonexistent.md'));
-    }
-
-    public function testHasChangedReturnsFalseForIdentical(): void
-    {
-        $src = $this->tempDir . '/source.php';
-        $doc = $this->tempDir . '/doc.md';
-        file_put_contents($src, '<?php echo "hi";');
-        $hash = $this->comparator->computeHash($src);
-        file_put_contents($doc, "---\nsource_hash: $hash\n---\n# Doc");
-        $this->assertFalse($this->comparator->hasChanged($src, $doc));
-    }
-
-    public function testHasChangedReturnsTrueForModified(): void
-    {
-        $src = $this->tempDir . '/source.php';
-        $doc = $this->tempDir . '/doc.md';
-        file_put_contents($src, '<?php echo "original";');
-        file_put_contents($doc, "---\nsource_hash: " . $this->comparator->computeHash($src) . "\n---\n# Doc");
-        file_put_contents($src, '<?php echo "modified";');
-        $this->assertTrue($this->comparator->hasChanged($src, $doc));
+        file_put_contents($path, "---\nhash: abc123def456\n---\n# Doc");
+        $this->assertSame('abc123def456', $this->comparator->extractStoredHash($path));
     }
 }

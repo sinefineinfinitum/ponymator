@@ -18,17 +18,15 @@ For identical source code and configuration, repeated runs produce byte-identica
 | :--- | :--- | :--- |
 | Full | `--full` | Regenerate all documentation |
 | Diff | `--diff` | Regenerate only changed files (default) |
-| Check | `--check` | Verify documentation is up-to-date |
 
 Exit codes:
 
-- `0` — success or up-to-date (check mode)
+- `0` — success
 - `1` — generic error (config, parse, runtime)
-- `2` — check mode: documentation is outdated
 
 ### Test-First Quality
 
-Every behavior affecting documentation, CLI contracts, configuration, parsing, or exit codes is covered by PHPUnit tests. Required coverage: AST parsing, Markdown format, config validation, full generation, incremental diff, check mode, error handling.
+Every behavior affecting documentation, CLI contracts, configuration, parsing, or exit codes is covered by PHPUnit tests. Required coverage: AST parsing, Markdown format, config validation, full generation, incremental diff, error handling.
 
 ## Installation
 
@@ -39,10 +37,45 @@ composer require sinefineinfinitum/ponymator
 ## Usage
 
 ```bash
-vendor/bin/ponymator [--full | --diff | --check] [--config=<path>] [--help]
+vendor/bin/ponymator [--full | --diff] [--config=<path>] [--help]
 ```
 
 By default, Ponimator runs in diff mode — only regenerating documentation for changed source files.
+
+## Generated Documentation Example
+
+The generated Markdown includes YAML frontmatter with a content hash and type, followed by a summary of the entity:
+
+````markdown
+---
+type: class
+hash: 3d8f1b2c9a0e
+---
+
+# `App\Service\UserService`
+
+## Head
+
+**Type**: class
+**Modifiers**: readonly
+**Parent**: `App\Abstracts\BaseService`
+**Interfaces**: `App\Contracts\ServiceInterface`
+
+## Methods
+
+- public static function create(string $name, array $data = []): App\Models\User
+- public function findById(int $id, ?bool $active = true): ?App\Models\User
+
+## Used by
+
+- [App\Contract\ServiceInterface](..\Contract\ServiceInterface.md)
+- `Vendor\Package\SomeClass`
+
+## Dependencies
+
+- [App\Abstract\BaseService](..\Abstract\BaseService.md)
+- [App\Model\User](..\Model\User.md)
+````
 
 ## Requirements
 

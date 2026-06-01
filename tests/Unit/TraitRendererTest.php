@@ -49,22 +49,19 @@ final class TraitRendererTest extends TestCase
 
     public function testRenderEntityUsingClasses(): void
     {
-        $crossRefs = ['trait_usage' => ['App\Traits\LoggableTrait' => ['App\Service\UserService']]];
+        $crossRefs = ['usedByLinks' => ['[App\Service\UserService](UserService.md)']];
         $result = $this->renderer->renderEntity($this->makeEntity(), $crossRefs);
-        $this->assertStringContainsString('`App\Service\UserService`', $result);
+        $this->assertStringContainsString('[App\Service\UserService](UserService.md)', $result);
     }
 
     public function testRenderEntityUsingClassesFilteredByFqn(): void
     {
         $crossRefs = [
-            'trait_usage' => [
-                'App\Traits\LoggableTrait' => ['App\Service\UserService'],
-                'App\Traits\OtherTrait' => ['App\Service\OtherService'],
-            ],
+            'usedByLinks' => ['[App\Service\UserService](UserService.md)'],
         ];
         $result = $this->renderer->renderEntity($this->makeEntity(), $crossRefs);
-        $this->assertStringContainsString('`App\Service\UserService`', $result);
-        $this->assertStringNotContainsString('`App\Service\OtherService`', $result);
+        $this->assertStringContainsString('[App\Service\UserService](UserService.md)', $result);
+        $this->assertStringNotContainsString('OtherService', $result);
     }
 
     public function testRenderEntityNoUsingClassesForDifferentTrait(): void
@@ -93,15 +90,14 @@ final class TraitRendererTest extends TestCase
 
     public function testRenderEntityIncludesDependencies(): void
     {
-        $entity = $this->makeEntity(['dependencies' => ['Psr\Log\LoggerInterface']]);
-        $result = $this->renderer->renderEntity($entity, []);
+        $crossRefs = ['dependencies' => ['`Psr\Log\LoggerInterface`']];
+        $result = $this->renderer->renderEntity($this->makeEntity(), $crossRefs);
         $this->assertStringContainsString('`Psr\Log\LoggerInterface`', $result);
     }
 
     public function testRenderEntityNoDependencies(): void
     {
-        $entity = $this->makeEntity(['dependencies' => []]);
-        $result = $this->renderer->renderEntity($entity, []);
+        $result = $this->renderer->renderEntity($this->makeEntity(), []);
         $this->assertStringNotContainsString('External Dependencies', $result);
     }
 

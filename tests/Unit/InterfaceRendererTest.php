@@ -54,29 +54,26 @@ final class InterfaceRendererTest extends TestCase
 
     public function testRenderEntityKnownImplementations(): void
     {
-        $crossRefs = ['implements' => ['App\Contracts\ServiceInterface' => ['App\Service\UserService', 'App\Service\AdminService']]];
+        $crossRefs = ['usedByLinks' => ['[App\Service\UserService](UserService.md)', '[App\Service\AdminService](AdminService.md)']];
         $result = $this->renderer->renderEntity($this->makeEntity(), $crossRefs);
-        $this->assertStringContainsString('`App\Service\UserService`', $result);
-        $this->assertStringContainsString('`App\Service\AdminService`', $result);
+        $this->assertStringContainsString('[App\Service\UserService](UserService.md)', $result);
+        $this->assertStringContainsString('[App\Service\AdminService](AdminService.md)', $result);
     }
 
     public function testRenderEntityKnownImplementationsFilteredByFqn(): void
     {
         $crossRefs = [
-            'implements' => [
-                'App\Contracts\ServiceInterface' => ['App\Service\UserService'],
-                'App\Contracts\AnotherInterface' => ['App\Service\OtherService'],
-            ],
+            'usedByLinks' => ['[App\Service\UserService](UserService.md)'],
         ];
         $result = $this->renderer->renderEntity($this->makeEntity(), $crossRefs);
-        $this->assertStringContainsString('`App\Service\UserService`', $result);
-        $this->assertStringNotContainsString('`App\Service\OtherService`', $result);
+        $this->assertStringContainsString('[App\Service\UserService](UserService.md)', $result);
+        $this->assertStringNotContainsString('OtherService', $result);
     }
 
     public function testRenderEntityIncludesDependencies(): void
     {
-        $entity = $this->makeEntity(['dependencies' => ['App\Models\User']]);
-        $result = $this->renderer->renderEntity($entity, []);
+        $crossRefs = ['dependencies' => ['`App\Models\User`']];
+        $result = $this->renderer->renderEntity($this->makeEntity(), $crossRefs);
         $this->assertStringContainsString('`App\Models\User`', $result);
     }
 
@@ -102,8 +99,7 @@ final class InterfaceRendererTest extends TestCase
 
     public function testRenderEntityNoDependencies(): void
     {
-        $entity = $this->makeEntity(['dependencies' => []]);
-        $result = $this->renderer->renderEntity($entity, []);
+        $result = $this->renderer->renderEntity($this->makeEntity(), []);
         $this->assertStringNotContainsString('External Dependencies', $result);
     }
 

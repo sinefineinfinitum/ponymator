@@ -6,7 +6,6 @@ final class ArgumentParser
 {
     public const FULL = 'full';
     public const DIFF = 'diff';
-    public const CHECK = 'check';
     private function __construct(
         public string $mode,
         public ?string $configPath,
@@ -26,17 +25,13 @@ final class ArgumentParser
         array_shift($argv);
 
         foreach ($argv as $arg) {
-            if ($arg === '--full') {
-                $mode = self::FULL;
-            } elseif ($arg === '--diff') {
-                $mode = self::DIFF;
-            } elseif ($arg === '--check') {
-                $mode = self::CHECK;
-            } elseif (str_starts_with($arg, '--config=')) {
-                $configPath = substr($arg, 9);
-            } elseif ($arg === '--help') {
-                $helpRequested = true;
-            }
+            match (true) {
+                $arg === '--full' => $mode = self::FULL,
+                $arg === '--diff' => $mode = self::DIFF,
+                str_starts_with($arg, '--config=') => $configPath = substr($arg, 9),
+                $arg === '--help' => $helpRequested = true,
+                default => null,
+            };
         }
 
         return new self($mode, $configPath, $helpRequested);
@@ -50,14 +45,12 @@ Usage: ponymator [options]
 Options:
   --full              Regenerate all documentation
   --diff              Regenerate only changed files (default)
-  --check             Verify documentation is up-to-date
   --config=<path>     Path to config file (default: .ponymator.json)
   --help              Display this help message
 
 Exit codes:
-  0   Success (all modes) or up-to-date (check mode)
+  0   Success
   1   Generic error (config, parse, runtime)
-  2   Check mode: documentation is outdated
 
 HELP;
     }

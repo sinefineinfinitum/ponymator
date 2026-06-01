@@ -2,6 +2,8 @@
 
 namespace SineFine\Ponymator\Documentation\Renderer;
 
+use SineFine\Ponymator\Comparator\HashGenerator;
+
 final class TraitRenderer implements EntityRendererInterface
 {
     public function __construct(
@@ -21,12 +23,11 @@ final class TraitRenderer implements EntityRendererInterface
     public function renderEntity(array $entity, array $crossRefs): string
     {
         $content = $this->buildContent($entity, $crossRefs);
-        $hash = hash('sha256', $content);
+        $hash = HashGenerator::shortHash($content);
         $md = $this->builder->frontmatter(
             [
             'type' => 'trait',
             'hash' => $hash,
-            'source_hash' => (string) ($crossRefs['_sourceHash'] ?? ''),
             ]
         );
         $md .= $content;
@@ -63,14 +64,13 @@ final class TraitRenderer implements EntityRendererInterface
             $md .= $this->builder->section('Methods', 3, $this->builder->methodsList($entity['methods']));
         }
 
-        $usageMap = is_array($crossRefs['trait_usage'] ?? null) ? $crossRefs['trait_usage'] : [];
-        $usingClasses = is_array($usageMap[$entity['fqn']] ?? null) ? $usageMap[$entity['fqn']] : [];
-        if (!empty($usingClasses)) {
-            $md .= $this->builder->section('Used by', 3, $this->builder->classList($usingClasses));
+        if (!empty($crossRefs['usedByLinks'])) {
+            $md .= $this->builder->usedBySection($crossRefs['usedByLinks']);
         }
 
-        if (!empty($entity['dependencies'])) {
-            $md .= $this->builder->section('Dependencies', 3, $this->builder->dependenciesList($entity['dependencies']));
+        $dependencies = $crossRefs['dependencies'] ?? [];
+        if (!empty($dependencies)) {
+            $md .= $this->builder->section('Dependencies', 3, $this->builder->dependenciesList($dependencies));
         }
 
         return $md;

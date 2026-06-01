@@ -84,15 +84,14 @@ final class EnumRendererTest extends TestCase
 
     public function testRenderEntityIncludesDependencies(): void
     {
-        $entity = $this->makeBackedEnum(['dependencies' => ['App\Models\StatusType']]);
-        $result = $this->renderer->renderEntity($entity, []);
+        $crossRefs = ['dependencies' => ['`App\Models\StatusType`']];
+        $result = $this->renderer->renderEntity($this->makeBackedEnum(), $crossRefs);
         $this->assertStringContainsString('`App\Models\StatusType`', $result);
     }
 
     public function testRenderEntityNoDependencies(): void
     {
-        $entity = $this->makeBackedEnum(['dependencies' => []]);
-        $result = $this->renderer->renderEntity($entity, []);
+        $result = $this->renderer->renderEntity($this->makeBackedEnum(), []);
         $this->assertStringNotContainsString('External Dependencies', $result);
     }
 

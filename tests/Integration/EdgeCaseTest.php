@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 use SineFine\Ponymator\Analyzer\DependencyAnalyzer;
 use SineFine\Ponymator\Analyzer\EntityExtractor;
 use SineFine\Ponymator\Analyzer\FileExtractor;
+use SineFine\Ponymator\Analyzer\Link\CrossReferenceIndexBuilder;
 use SineFine\Ponymator\Analyzer\Parser;
 use SineFine\Ponymator\Comparator\HashComparator;
 use SineFine\Ponymator\Config;
@@ -69,6 +70,7 @@ final class EdgeCaseTest extends TestCase
         $fileRenderer = new FileRenderer($builder);
         $hashComparator = new HashComparator();
         $pathResolver = new PathResolver($config);
+        $indexBuilder = new CrossReferenceIndexBuilder($parser, $pathResolver);
         $documenter = new FileDocumenter(
             $parser,
             $entityExtractor,
@@ -81,7 +83,6 @@ final class EdgeCaseTest extends TestCase
                 $enumRenderer,
             ],
             $fileRenderer,
-            $hashComparator,
             $pathResolver,
         );
         $documentRemover = new OutdatedDocumentationRemover($pathResolver);
@@ -91,6 +92,7 @@ final class EdgeCaseTest extends TestCase
             $pathResolver,
             $documenter,
             $documentRemover,
+            $indexBuilder
         );
     }
 

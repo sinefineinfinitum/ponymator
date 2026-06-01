@@ -4,20 +4,6 @@ namespace SineFine\Ponymator\Comparator;
 
 final class HashComparator
 {
-    public function computeContentHash(string $content): string
-    {
-        return hash('sha256', $content);
-    }
-
-    public function computeHash(string $filePath): string
-    {
-        $hash = hash_file('sha256', $filePath);
-        if ($hash === false) {
-            throw new \RuntimeException("Failed to compute hash for: $filePath");
-        }
-        return $hash;
-    }
-
     public function extractStoredHash(string $docPath): ?string
     {
         if (!file_exists($docPath)) {
@@ -42,21 +28,12 @@ final class HashComparator
 
         foreach (explode("\n", $frontmatter) as $line) {
             $line = trim($line);
-            if (str_starts_with($line, 'source_hash:')) {
-                $hash = trim(substr($line, 12));
+            if (str_starts_with($line, 'hash:')) {
+                $hash = trim(substr($line, 5));
                 return $hash !== '' ? $hash : null;
             }
         }
 
         return null;
-    }
-
-    public function hasChanged(string $sourcePath, string $docPath): bool
-    {
-        $stored = $this->extractStoredHash($docPath);
-        if ($stored === null) {
-            return true;
-        }
-        return $this->computeHash($sourcePath) !== $stored;
     }
 }
