@@ -19,7 +19,7 @@ class Config
     {
         $this->config = self::DEFAULTS;
 
-        $path = $configPath ?? getcwd() . '/.ponimator.json';
+        $path = $configPath ?? getcwd() . '/.ponymator.json';
 
         if (!file_exists($path)) {
             if ($configPath !== null) {

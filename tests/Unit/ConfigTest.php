@@ -11,7 +11,7 @@ final class ConfigTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->tempDir = sys_get_temp_dir() . '/ponimator_test_' . uniqid();
+        $this->tempDir = sys_get_temp_dir() . '/ponymator_test_' . uniqid();
         mkdir($this->tempDir, 0777, true);
     }
 
@@ -33,7 +33,7 @@ final class ConfigTest extends TestCase
 
     public function testCustomConfig(): void
     {
-        $path = $this->tempDir . '/.ponimator.json';
+        $path = $this->tempDir . '/.ponymator.json';
         file_put_contents(
             $path, json_encode(
                 [
@@ -58,7 +58,7 @@ final class ConfigTest extends TestCase
 
     public function testMalformedJsonFallsBackToDefaults(): void
     {
-        $path = $this->tempDir . '/.ponimator.json';
+        $path = $this->tempDir . '/.ponymator.json';
         file_put_contents($path, '{invalid json}');
         $config = new Config($path);
         $this->assertSame('src', $config->getSource());
@@ -67,7 +67,7 @@ final class ConfigTest extends TestCase
 
     public function testPartialConfigMergesWithDefaults(): void
     {
-        $path = $this->tempDir . '/.ponimator.json';
+        $path = $this->tempDir . '/.ponymator.json';
         file_put_contents($path, json_encode(['source' => 'custom_src']));
         $config = new Config($path);
         $this->assertSame('custom_src', $config->getSource());

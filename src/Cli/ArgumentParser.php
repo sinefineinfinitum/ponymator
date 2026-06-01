@@ -45,13 +45,13 @@ final class ArgumentParser
     public static function printHelp(): void
     {
         echo <<<'HELP'
-Usage: ponimator [options]
+Usage: ponymator [options]
 
 Options:
   --full              Regenerate all documentation
   --diff              Regenerate only changed files (default)
   --check             Verify documentation is up-to-date
-  --config=<path>     Path to config file (default: .ponimator.json)
+  --config=<path>     Path to config file (default: .ponymator.json)
   --help              Display this help message
 
 Exit codes:

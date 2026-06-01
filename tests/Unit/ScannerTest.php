@@ -11,7 +11,7 @@ final class ScannerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->tempDir = sys_get_temp_dir() . '/ponimator_scan_' . uniqid();
+        $this->tempDir = sys_get_temp_dir() . '/ponymator_scan_' . uniqid();
         mkdir($this->tempDir . '/sub', 0777, true);
         mkdir($this->tempDir . '/vendor', 0777, true);
         touch($this->tempDir . '/User.php');

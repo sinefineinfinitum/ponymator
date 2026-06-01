@@ -29,7 +29,7 @@ final class EdgeCaseTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->tempDir = sys_get_temp_dir() . '/ponimator-edge-test-' . uniqid();
+        $this->tempDir = sys_get_temp_dir() . '/ponymator-edge-test-' . uniqid();
         $this->sourceDir = $this->tempDir . '/src';
         $this->targetDir = $this->tempDir . '/docs';
         mkdir($this->sourceDir, 0755, true);
@@ -138,9 +138,9 @@ class Hidden {
     {
         $badDir = $this->tempDir . '/badconfig';
         mkdir($badDir);
-        file_put_contents($badDir . '/.ponimator.json', 'not valid json {{{');
+        file_put_contents($badDir . '/.ponymator.json', 'not valid json {{{');
 
-        $config = new Config($badDir . '/.ponimator.json');
+        $config = new Config($badDir . '/.ponymator.json');
 
         $this->assertSame('src', $config->getSource());
     }

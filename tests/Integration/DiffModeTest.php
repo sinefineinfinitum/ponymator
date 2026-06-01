@@ -27,7 +27,7 @@ final class DiffModeTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->tempDir = sys_get_temp_dir() . '/ponimator-diff-test-' . uniqid();
+        $this->tempDir = sys_get_temp_dir() . '/ponymator-diff-test-' . uniqid();
         $this->sourceDir = $this->tempDir . '/src';
         $this->targetDir = $this->tempDir . '/docs';
         mkdir($this->sourceDir, 0755, true);

@@ -1,4 +1,4 @@
-# Ponimator
+# Ponymator
 
 A CLI-first PHP documentation generator that produces deterministic Markdown documentation for a project's public API.
 
@@ -6,7 +6,7 @@ A CLI-first PHP documentation generator that produces deterministic Markdown doc
 
 ### AST-First Correctness
 
-Ponimator uses PHP Abstract Syntax Tree analysis (via [`nikic/php-parser`](https://github.com/nikic/PHP-Parser)) as the single source of truth. Public API extraction — classes, interfaces, traits, enums, public methods, signatures, inheritance, implemented interfaces, modifiers, and dependencies — is derived from parsed PHP source code, never from regex or string matching. If source code cannot be parsed, the tool fails with actionable diagnostics.
+Ponymator uses PHP Abstract Syntax Tree analysis (via [`nikic/php-parser`](https://github.com/nikic/PHP-Parser)) as the single source of truth. Public API extraction — classes, interfaces, traits, enums, public methods, signatures, inheritance, implemented interfaces, modifiers, and dependencies — is derived from parsed PHP source code, never from regex or string matching. If source code cannot be parsed, the tool fails with actionable diagnostics.
 
 ### Deterministic Output
 
@@ -76,7 +76,7 @@ src/
 
 ## Configuration
 
-Configuration file: `.ponimator.json`. Example:
+Configuration file: `.ponymator.json`. Example:
 ```json
 {
     "source": "app",

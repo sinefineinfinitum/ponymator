@@ -9,63 +9,63 @@ final class ArgumentParserTest extends TestCase
 {
     public function testDefaultModeIsDiff(): void
     {
-        $parser = ArgumentParser::parse(['ponimator']);
+        $parser = ArgumentParser::parse(['ponymator']);
         $this->assertSame(ArgumentParser::DIFF, $parser->mode);
     }
 
     public function testFullFlag(): void
     {
-        $parser = ArgumentParser::parse(['ponimator', '--full']);
+        $parser = ArgumentParser::parse(['ponymator', '--full']);
         $this->assertSame(ArgumentParser::FULL, $parser->mode);
     }
 
     public function testDiffFlag(): void
     {
-        $parser = ArgumentParser::parse(['ponimator', '--diff']);
+        $parser = ArgumentParser::parse(['ponymator', '--diff']);
         $this->assertSame(ArgumentParser::DIFF, $parser->mode);
     }
 
     public function testCheckFlag(): void
     {
-        $parser = ArgumentParser::parse(['ponimator', '--check']);
+        $parser = ArgumentParser::parse(['ponymator', '--check']);
         $this->assertSame(ArgumentParser::CHECK, $parser->mode);
     }
 
     public function testLastFlagWins(): void
     {
-        $parser = ArgumentParser::parse(['ponimator', '--full', '--check', '--diff']);
+        $parser = ArgumentParser::parse(['ponymator', '--full', '--check', '--diff']);
         $this->assertSame(ArgumentParser::DIFF, $parser->mode);
     }
 
     public function testConfigPath(): void
     {
-        $parser = ArgumentParser::parse(['ponimator', '--config=myconfig.json']);
+        $parser = ArgumentParser::parse(['ponymator', '--config=myconfig.json']);
         $this->assertSame('myconfig.json', $parser->configPath);
     }
 
     public function testConfigPathWithFull(): void
     {
-        $parser = ArgumentParser::parse(['ponimator', '--full', '--config=custom.json']);
+        $parser = ArgumentParser::parse(['ponymator', '--full', '--config=custom.json']);
         $this->assertSame(ArgumentParser::FULL, $parser->mode);
         $this->assertSame('custom.json', $parser->configPath);
     }
 
     public function testHelpFlag(): void
     {
-        $parser = ArgumentParser::parse(['ponimator', '--help']);
+        $parser = ArgumentParser::parse(['ponymator', '--help']);
         $this->assertTrue($parser->helpRequested);
     }
 
     public function testHelpWithMode(): void
     {
-        $parser = ArgumentParser::parse(['ponimator', '--check', '--help']);
+        $parser = ArgumentParser::parse(['ponymator', '--check', '--help']);
         $this->assertSame(ArgumentParser::CHECK, $parser->mode);
         $this->assertTrue($parser->helpRequested);
     }
 
     public function testPrintHelpOutput(): void
     {
-        $this->expectOutputRegex('/Usage: ponimator/');
+        $this->expectOutputRegex('/Usage: ponymator/');
         ArgumentParser::printHelp();
     }
 }

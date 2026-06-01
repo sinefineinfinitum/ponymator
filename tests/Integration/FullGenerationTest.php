@@ -32,7 +32,7 @@ final class FullGenerationTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->tempDir = sys_get_temp_dir() . '/ponimator-test-' . uniqid();
+        $this->tempDir = sys_get_temp_dir() . '/ponymator-test-' . uniqid();
         $this->sourceDir = $this->tempDir . '/src';
         $this->targetDir = $this->tempDir . '/docs';
 

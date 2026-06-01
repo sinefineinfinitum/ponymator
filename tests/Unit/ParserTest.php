@@ -11,7 +11,7 @@ final class ParserTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->tempDir = sys_get_temp_dir() . '/ponimator_parse_' . uniqid();
+        $this->tempDir = sys_get_temp_dir() . '/ponymator_parse_' . uniqid();
         mkdir($this->tempDir);
     }
 

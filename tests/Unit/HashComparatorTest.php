@@ -13,7 +13,7 @@ final class HashComparatorTest extends TestCase
     protected function setUp(): void
     {
         $this->comparator = new HashComparator();
-        $this->tempDir = sys_get_temp_dir() . '/ponimator-hash-test-' . uniqid();
+        $this->tempDir = sys_get_temp_dir() . '/ponymator-hash-test-' . uniqid();
         mkdir($this->tempDir, 0755, true);
     }
 

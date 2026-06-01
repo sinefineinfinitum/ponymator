@@ -29,7 +29,7 @@ final class CheckModeTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->tempDir = sys_get_temp_dir() . '/ponimator-check-int-test-' . uniqid();
+        $this->tempDir = sys_get_temp_dir() . '/ponymator-check-int-test-' . uniqid();
         $this->sourceDir = $this->tempDir . '/src';
         $this->targetDir = $this->tempDir . '/docs';
         mkdir($this->sourceDir, 0755, true);
