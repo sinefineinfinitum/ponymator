@@ -2,6 +2,8 @@
 
 namespace SineFine\Ponymator\Documentation\Renderer;
 
+use SineFine\Ponymator\Comparator\HashGenerator;
+
 final class EnumRenderer implements EntityRendererInterface
 {
     public function __construct(
@@ -20,13 +22,12 @@ final class EnumRenderer implements EntityRendererInterface
      */
     public function renderEntity(array $entity, array $crossRefs): string
     {
-        $content = $this->buildContent($entity);
-        $hash = hash('sha256', $content);
+        $content = $this->buildContent($entity, $crossRefs);
+        $hash = HashGenerator::shortHash($content);
         $md = $this->builder->frontmatter(
             [
             'type' => 'enum',
             'hash' => $hash,
-            'source_hash' => (string) ($crossRefs['_sourceHash'] ?? ''),
             ]
         );
         $md .= $content;
@@ -35,8 +36,9 @@ final class EnumRenderer implements EntityRendererInterface
 
     /**
      * @param array<string, mixed> $entity
+     * @param array<string, mixed> $crossRefs
      */
-    private function buildContent(array $entity): string
+    private function buildContent(array $entity, array $crossRefs = []): string
     {
         $md = "\n";
         $md .= $this->builder->header(1, '`' . $entity['fqn'] . '`');
@@ -67,8 +69,13 @@ final class EnumRenderer implements EntityRendererInterface
             $md .= $this->builder->section('Methods', 3, $this->builder->methodsList($entity['methods']));
         }
 
-        if (!empty($entity['dependencies'])) {
-            $md .= $this->builder->section('Dependencies', 3, $this->builder->dependenciesList($entity['dependencies']));
+        if (!empty($crossRefs['usedByLinks'])) {
+            $md .= $this->builder->usedBySection($crossRefs['usedByLinks']);
+        }
+
+        $dependencies = $crossRefs['dependencies'] ?? [];
+        if (!empty($dependencies)) {
+            $md .= $this->builder->section('Dependencies', 3, $this->builder->dependenciesList($dependencies));
         }
 
         return $md;

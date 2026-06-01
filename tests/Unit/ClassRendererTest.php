@@ -49,8 +49,8 @@ final class ClassRendererTest extends TestCase
 
     public function testRenderEntityIncludesDependencies(): void
     {
-        $entity = $this->makeEntity(['dependencies' => ['Psr\Log\LoggerInterface', 'App\Services\Validator']]);
-        $result = $this->renderer->renderEntity($entity, []);
+        $crossRefs = ['dependencies' => ['`Psr\Log\LoggerInterface`', '`App\Services\Validator`']];
+        $result = $this->renderer->renderEntity($this->makeEntity(), $crossRefs);
         $this->assertStringContainsString('`Psr\Log\LoggerInterface`', $result);
         $this->assertStringContainsString('`App\Services\Validator`', $result);
     }
@@ -93,8 +93,7 @@ final class ClassRendererTest extends TestCase
 
     public function testRenderEntityNoDependencies(): void
     {
-        $entity = $this->makeEntity(['dependencies' => []]);
-        $result = $this->renderer->renderEntity($entity, []);
+        $result = $this->renderer->renderEntity($this->makeEntity(), []);
         $this->assertStringNotContainsString('External Dependencies', $result);
     }
 

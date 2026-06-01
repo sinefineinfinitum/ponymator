@@ -174,7 +174,7 @@ final class MarkdownBuilder
     {
         $result = '';
         foreach ($deps as $dep) {
-            $result .= $this->listItem($this->inlineCode($dep));
+            $result .= $this->listItem($dep);
         }
         return $result;
     }
@@ -201,6 +201,21 @@ final class MarkdownBuilder
             $result .= $this->listItem($this->inlineCode($item));
         }
         return $result;
+    }
+
+    /**
+     * @param string[] $links Already-rendered Markdown link lines
+     */
+    public function usedBySection(array $links): string
+    {
+        if (empty($links)) {
+            return '';
+        }
+        $list = '';
+        foreach ($links as $link) {
+            $list .= $this->listItem($link);
+        }
+        return $this->section('Used By', 3, $list);
     }
 
     /**

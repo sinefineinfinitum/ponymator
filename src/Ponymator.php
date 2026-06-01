@@ -2,10 +2,11 @@
 
 namespace SineFine\Ponymator;
 
+use InvalidArgumentException;
 use SineFine\Ponymator\Analyzer\DependencyAnalyzer;
 use SineFine\Ponymator\Analyzer\EntityExtractor;
 use SineFine\Ponymator\Analyzer\FileExtractor;
-use SineFine\Ponymator\Analyzer\FreshnessChecker;
+use SineFine\Ponymator\Analyzer\Link\CrossReferenceIndexBuilder;
 use SineFine\Ponymator\Analyzer\Parser;
 use SineFine\Ponymator\Cli\ArgumentParser;
 use SineFine\Ponymator\Comparator\HashComparator;
@@ -47,7 +48,7 @@ class Ponymator
         $fileRenderer = new FileRenderer($builder);
         $hashComparator = new HashComparator();
         $pathResolver = new PathResolver($config);
-        $freshnessChecker = new FreshnessChecker($pathResolver, $hashComparator);
+
         $documenter = new FileDocumenter(
             $parser,
             $entityExtractor,
@@ -60,22 +61,23 @@ class Ponymator
                 $enumRenderer,
             ],
             $fileRenderer,
-            $hashComparator,
             $pathResolver,
         );
         $documentRemover = new OutdatedDocumentationRemover($pathResolver);
+        $crossReferenceIndexBuilder = new CrossReferenceIndexBuilder($parser, $pathResolver);
 
         $generator = new MarkdownGenerator(
             $hashComparator,
             $pathResolver,
             $documenter,
             $documentRemover,
+            $crossReferenceIndexBuilder,
         );
 
         try {
             $scanner = new Scanner($config->getSource(), $config->getIgnore());
             $sourceFiles = $scanner->scan();
-        } catch (\InvalidArgumentException $exception){
+        } catch (InvalidArgumentException $exception){
             echo $exception->getMessage() . "\n";
             exit(0);
         }
@@ -87,9 +89,7 @@ class Ponymator
 
         match ($args->mode) {
             ArgumentParser::DIFF => $this->runDiff($generator, $sourceFiles),
-            ArgumentParser::CHECK => $this->runCheck($freshnessChecker, $sourceFiles),
-            ArgumentParser::FULL => $this->runFull($generator, $sourceFiles),
-            default => $this->runFull($generator, $sourceFiles),
+            default              => $this->runFull($generator, $sourceFiles),
         };
     }
 
@@ -117,23 +117,6 @@ class Ponymator
     {
         $result = $generator->generateDiff($sourceFiles);
         $this->reportSummary($result);
-    }
-
-    /**
-     * @param FreshnessChecker $checker
-     * @param string[]         $sourceFiles
-     */
-    private function runCheck(FreshnessChecker $checker, array $sourceFiles): void
-    {
-        $staleCount = $checker->check($sourceFiles);
-
-        if ($staleCount === 0) {
-            echo "Documentation is up-to-date.\n";
-            exit(0);
-        }
-
-        echo "Documentation is outdated: $staleCount file(s) stale.\n";
-        exit(2);
     }
 
     private function reportSummary(GenerationResult $result): void

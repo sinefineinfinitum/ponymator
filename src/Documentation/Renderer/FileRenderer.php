@@ -2,6 +2,8 @@
 
 namespace SineFine\Ponymator\Documentation\Renderer;
 
+use SineFine\Ponymator\Comparator\HashGenerator;
+
 final class FileRenderer
 {
     public function __construct(
@@ -15,7 +17,7 @@ final class FileRenderer
      * @param string[]                         $globals
      * @param array<int, array<string, mixed>> $constants
      */
-    public function renderFile(string $relativePath, array $functions, array $globals, array $constants, string $sourceHash): string
+    public function renderFile(string $relativePath, array $functions, array $globals, array $constants): string
     {
         $content = '';
         if (!empty($functions)) {
@@ -28,12 +30,11 @@ final class FileRenderer
             $content .= $this->builder->section('Global constants', 3, $this->constantsList($constants));
         }
 
-        $hash = hash('sha256', $content);
+        $hash = HashGenerator::shortHash($content);
         $md = $this->builder->frontmatter(
             [
             'type' => 'file',
             'hash' => $hash,
-            'source_hash' => $sourceHash,
             ]
         );
 

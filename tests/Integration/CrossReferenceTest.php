@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 use SineFine\Ponymator\Analyzer\DependencyAnalyzer;
 use SineFine\Ponymator\Analyzer\EntityExtractor;
 use SineFine\Ponymator\Analyzer\FileExtractor;
+use SineFine\Ponymator\Analyzer\Link\CrossReferenceIndexBuilder;
 use SineFine\Ponymator\Analyzer\Parser;
 use SineFine\Ponymator\Comparator\HashComparator;
 use SineFine\Ponymator\Config;
@@ -74,6 +75,7 @@ final class CrossReferenceTest extends TestCase
         $fileRenderer = new FileRenderer($builder);
         $hashComparator = new HashComparator();
         $pathResolver = new PathResolver($config);
+        $indexBuilder = new CrossReferenceIndexBuilder($parser, $pathResolver);
         $documenter = new FileDocumenter(
             $parser,
             $entityExtractor,
@@ -81,12 +83,11 @@ final class CrossReferenceTest extends TestCase
             $dependencyAnalyzer,
             [$classRenderer, $interfaceRenderer, $traitRenderer, $enumRenderer],
             $fileRenderer,
-            $hashComparator,
             $pathResolver,
         );
         $documentRemover = new OutdatedDocumentationRemover($pathResolver);
 
-        return new MarkdownGenerator($hashComparator, $pathResolver, $documenter, $documentRemover);
+        return new MarkdownGenerator($hashComparator, $pathResolver, $documenter, $documentRemover, $indexBuilder);
     }
 
     public function testFullGenerationIncludesKnownImplementations(): void
@@ -114,12 +115,12 @@ final class CrossReferenceTest extends TestCase
         $this->assertFileExists($this->targetDir . '/Service/AdminService.md');
 
         $interfaceDoc = file_get_contents($this->targetDir . '/Contracts/ServiceInterface.md');
-        $this->assertStringContainsString('Implementations', $interfaceDoc);
-        $this->assertStringContainsString('App\Service\UserService', $interfaceDoc);
+        $this->assertStringContainsString('Used By', $interfaceDoc);
+        $this->assertStringContainsString('[App\Service\UserService](../Service/UserService.md)', $interfaceDoc);
 
         $traitDoc = file_get_contents($this->targetDir . '/Traits/LoggableTrait.md');
-        $this->assertStringContainsString('Used by', $traitDoc);
-        $this->assertStringContainsString('App\Service\AdminService', $traitDoc);
+        $this->assertStringContainsString('Used By', $traitDoc);
+        $this->assertStringContainsString('[App\Service\AdminService](../Service/AdminService.md)', $traitDoc);
     }
 
     private function rmdir(string $dir): void

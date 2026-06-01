@@ -25,15 +25,9 @@ final class ArgumentParserTest extends TestCase
         $this->assertSame(ArgumentParser::DIFF, $parser->mode);
     }
 
-    public function testCheckFlag(): void
-    {
-        $parser = ArgumentParser::parse(['ponymator', '--check']);
-        $this->assertSame(ArgumentParser::CHECK, $parser->mode);
-    }
-
     public function testLastFlagWins(): void
     {
-        $parser = ArgumentParser::parse(['ponymator', '--full', '--check', '--diff']);
+        $parser = ArgumentParser::parse(['ponymator', '--full', '--diff']);
         $this->assertSame(ArgumentParser::DIFF, $parser->mode);
     }
 
@@ -53,13 +47,6 @@ final class ArgumentParserTest extends TestCase
     public function testHelpFlag(): void
     {
         $parser = ArgumentParser::parse(['ponymator', '--help']);
-        $this->assertTrue($parser->helpRequested);
-    }
-
-    public function testHelpWithMode(): void
-    {
-        $parser = ArgumentParser::parse(['ponymator', '--check', '--help']);
-        $this->assertSame(ArgumentParser::CHECK, $parser->mode);
         $this->assertTrue($parser->helpRequested);
     }
 

@@ -348,7 +348,7 @@ final class MarkdownBuilderTest extends TestCase
 
     public function testDependenciesList(): void
     {
-        $deps = ['Psr\Log\LoggerInterface', 'App\Service'];
+        $deps = ['`Psr\Log\LoggerInterface`', '`App\Service`'];
         $expected = "- `Psr\Log\LoggerInterface`\n- `App\Service`\n";
         $this->assertSame($expected, $this->builder->dependenciesList($deps));
     }
@@ -356,12 +356,6 @@ final class MarkdownBuilderTest extends TestCase
     public function testDependenciesListEmpty(): void
     {
         $this->assertSame('', $this->builder->dependenciesList([]));
-    }
-
-    public function testDependenciesListWithBacktick(): void
-    {
-        $deps = ['a`b'];
-        $this->assertSame("- ``a`b``\n", $this->builder->dependenciesList($deps));
     }
 
     public function testClassList(): void
@@ -421,6 +415,52 @@ final class MarkdownBuilderTest extends TestCase
         yield 'three consecutive' => ['a```b', '````a```b````'];
         yield 'only backticks' => ['``', '``` `` ```'];
         yield 'backtick at both ends' => ['`x`', '`` `x` ``'];
+    }
+
+    public function testUsedBySectionWithLinks(): void
+    {
+        $links = ['[App\Service\UserService](UserService.md)'];
+        $expected = "### Used By\n\n- [App\\Service\\UserService](UserService.md)\n\n";
+        $this->assertSame($expected, $this->builder->usedBySection($links));
+    }
+
+    public function testUsedBySectionEmpty(): void
+    {
+        $this->assertSame('', $this->builder->usedBySection([]));
+    }
+
+    public function testUsedBySectionMultipleLinks(): void
+    {
+        $links = [
+            '[App\Service\AdminService](AdminService.md)',
+            '[App\Service\UserService](UserService.md)',
+        ];
+        $result = $this->builder->usedBySection($links);
+        $this->assertStringContainsString('[App\\Service\\AdminService](AdminService.md)', $result);
+        $this->assertStringContainsString('[App\\Service\\UserService](UserService.md)', $result);
+    }
+
+    public function testUsedBySectionDeterministic(): void
+    {
+        $links = [
+            '[App\Service\AdminService](AdminService.md)',
+            '[App\Service\UserService](UserService.md)',
+        ];
+        $first = $this->builder->usedBySection($links);
+        $second = $this->builder->usedBySection($links);
+        $this->assertSame($first, $second);
+    }
+
+    public function testUsedBySectionSortingNotApplied(): void
+    {
+        $linksUnsorted = [
+            '[B](B.md)',
+            '[A](A.md)',
+        ];
+        $result = $this->builder->usedBySection($linksUnsorted);
+        $expectedPosB = strpos($result, 'B](B.md)');
+        $expectedPosA = strpos($result, 'A](A.md)');
+        $this->assertTrue($expectedPosB < $expectedPosA, 'List preserves input order');
     }
 
     public function testOverallDeterminism(): void

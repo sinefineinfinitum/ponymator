@@ -57,7 +57,6 @@ The CLI should support clear modes for:
 
 - Full documentation generation
 - Incremental updates
-- Freshness/check mode
 
 Use output streams consistently:
 
@@ -66,8 +65,8 @@ Use output streams consistently:
 
 Exit codes must be meaningful:
 
-- `0`: successful execution or up-to-date documentation checks
-- Non-zero: outdated documentation, invalid configuration, parse failures, file system errors, or unexpected runtime failures
+- `0`: successful execution
+- Non-zero: invalid configuration, parse failures, file system errors, or unexpected runtime failures
 
 Do not introduce behavior that makes the tool difficult to use in automation scripts or CI pipelines.
 
@@ -86,7 +85,7 @@ Required test coverage areas include:
 - Configuration loading and validation
 - Full generation mode
 - Incremental diff/update mode
-- Check mode and exit codes
+- Exit codes
 - Error handling and diagnostics
 
 ## Implementation Guidance
