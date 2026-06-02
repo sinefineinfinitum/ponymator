@@ -3,6 +3,7 @@
 namespace SineFine\Ponymator\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
+use SineFine\Ponymator\Documentation\Generator\CrossReference;
 use SineFine\Ponymator\Documentation\Renderer\EnumRenderer;
 use SineFine\Ponymator\Documentation\Renderer\MarkdownBuilder;
 
@@ -17,25 +18,25 @@ final class EnumRendererTest extends TestCase
 
     public function testRenderEntityIncludesFrontmatter(): void
     {
-        $result = $this->renderer->renderEntity($this->makeBackedEnum(), []);
+        $result = $this->renderer->renderEntity($this->makeBackedEnum(), new CrossReference());
         $this->assertStringContainsString('type: enum', $result);
     }
 
     public function testRenderEntityIncludesFqn(): void
     {
-        $result = $this->renderer->renderEntity($this->makeBackedEnum(), []);
+        $result = $this->renderer->renderEntity($this->makeBackedEnum(), new CrossReference());
         $this->assertStringContainsString('`App\Enum\Status`', $result);
     }
 
     public function testRenderEntityBackingType(): void
     {
-        $result = $this->renderer->renderEntity($this->makeBackedEnum(), []);
-        $this->assertStringContainsString('**Backing type:** `string`', $result);
+        $result = $this->renderer->renderEntity($this->makeBackedEnum(), new CrossReference());
+        $this->assertStringContainsString('`backed enum` of `string`', $result);
     }
 
     public function testRenderEntityCases(): void
     {
-        $result = $this->renderer->renderEntity($this->makeBackedEnum(), []);
+        $result = $this->renderer->renderEntity($this->makeBackedEnum(), new CrossReference());
         $this->assertStringContainsString('`Active`', $result);
         $this->assertStringContainsString("`'active'`", $result);
         $this->assertStringContainsString('`Inactive`', $result);
@@ -51,55 +52,58 @@ final class EnumRendererTest extends TestCase
             ],
             ]
         );
-        $result = $this->renderer->renderEntity($entity, []);
+        $result = $this->renderer->renderEntity($entity, new CrossReference());
         $this->assertStringContainsString('DEFAULT', $result);
     }
 
     public function testRenderEntityMethodSignatures(): void
     {
-        $result = $this->renderer->renderEntity($this->makeBackedEnum(), []);
-        $this->assertStringContainsString('public function isActive(): bool', $result);
+        $result = $this->renderer->renderEntity($this->makeBackedEnum(), new CrossReference());
+        $this->assertStringContainsString('`public function isActive(', $result);
+        $this->assertStringContainsString('`): `', $result);
+        $this->assertStringContainsString('`bool`', $result);
     }
 
     public function testRenderEntityNoConstants(): void
     {
         $entity = $this->makeBackedEnum(['constants' => []]);
-        $result = $this->renderer->renderEntity($entity, []);
+        $result = $this->renderer->renderEntity($entity, new CrossReference());
         $this->assertStringNotContainsString('Constants', $result);
     }
 
     public function testRenderEntityNoMethods(): void
     {
         $entity = $this->makeBackedEnum(['methods' => []]);
-        $result = $this->renderer->renderEntity($entity, []);
+        $result = $this->renderer->renderEntity($entity, new CrossReference());
         $this->assertStringNotContainsString('Public methods', $result);
     }
 
     public function testRenderPureEnumNoBackingType(): void
     {
         $entity = $this->makeBackedEnum(['scalarType' => null]);
-        $result = $this->renderer->renderEntity($entity, []);
-        $this->assertStringNotContainsString('Backing type', $result);
+        $result = $this->renderer->renderEntity($entity, new CrossReference());
+        $this->assertStringContainsString('`enum`', $result);
+        $this->assertStringNotContainsString('of', $result);
     }
 
-    public function testRenderEntityIncludesDependencies(): void
+    public function testRenderEntityNoDependenciesSection(): void
     {
-        $crossRefs = ['dependencies' => ['`App\Models\StatusType`']];
+        $crossRefs = new CrossReference(['`App\Models\StatusType`']);
         $result = $this->renderer->renderEntity($this->makeBackedEnum(), $crossRefs);
-        $this->assertStringContainsString('`App\Models\StatusType`', $result);
+        $this->assertStringNotContainsString('### Dependencies', $result);
     }
 
-    public function testRenderEntityNoDependencies(): void
+    public function testRenderEntityNoHeadSection(): void
     {
-        $result = $this->renderer->renderEntity($this->makeBackedEnum(), []);
-        $this->assertStringNotContainsString('External Dependencies', $result);
+        $result = $this->renderer->renderEntity($this->makeBackedEnum(), new CrossReference());
+        $this->assertStringNotContainsString('### Head', $result);
     }
 
     public function testRenderEntityHashIsDeterministic(): void
     {
         $entity = $this->makeBackedEnum();
-        $first = $this->renderer->renderEntity($entity, []);
-        $second = $this->renderer->renderEntity($entity, []);
+        $first = $this->renderer->renderEntity($entity, new CrossReference());
+        $second = $this->renderer->renderEntity($entity, new CrossReference());
         $this->assertSame($first, $second);
     }
 

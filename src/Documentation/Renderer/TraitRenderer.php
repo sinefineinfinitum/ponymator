@@ -2,6 +2,7 @@
 
 namespace SineFine\Ponymator\Documentation\Renderer;
 
+use SineFine\Ponymator\Documentation\Generator\CrossReference;
 use SineFine\Ponymator\Comparator\HashGenerator;
 
 final class TraitRenderer implements EntityRendererInterface
@@ -18,9 +19,9 @@ final class TraitRenderer implements EntityRendererInterface
 
     /**
      * @param array<string, mixed> $entity
-     * @param array<string, mixed> $crossRefs
+     * @param CrossReference       $crossRefs
      */
-    public function renderEntity(array $entity, array $crossRefs): string
+    public function renderEntity(array $entity, CrossReference $crossRefs): string
     {
         $content = $this->buildContent($entity, $crossRefs);
         $hash = HashGenerator::shortHash($content);
@@ -36,20 +37,17 @@ final class TraitRenderer implements EntityRendererInterface
 
     /**
      * @param array<string, mixed> $entity
-     * @param array<string, mixed> $crossRefs
+     * @param CrossReference       $crossRefs
      */
-    private function buildContent(array $entity, array $crossRefs): string
+    private function buildContent(array $entity, CrossReference $crossRefs): string
     {
+        $linkResolver = $crossRefs->getTypeLinkResolver();
+
         $md = "\n";
         $md .= $this->builder->header(1, '`' . $entity['fqn'] . '`');
         $md .= "\n";
 
-        $md .= $this->builder->header(3, 'Head');
-        $md .= $this->builder->kvList(
-            [
-            'Type' => '`trait`',
-            ]
-        );
+        $md .= $this->builder->declarationLine('trait', null, null, [], []);
         $md .= "\n";
 
         if (!empty($entity['constants'])) {
@@ -57,20 +55,15 @@ final class TraitRenderer implements EntityRendererInterface
         }
 
         if (!empty($entity['properties'])) {
-            $md .= $this->builder->section('Properties', 3, $this->builder->propertiesTable($entity['properties']));
+            $md .= $this->builder->section('Properties', 3, $this->builder->propertiesList($entity['properties'], $linkResolver));
         }
 
         if (!empty($entity['methods'])) {
-            $md .= $this->builder->section('Methods', 3, $this->builder->methodsList($entity['methods']));
+            $md .= $this->builder->section('Methods', 3, $this->builder->methodsList($entity['methods'], $linkResolver));
         }
 
-        if (!empty($crossRefs['usedByLinks'])) {
-            $md .= $this->builder->usedBySection($crossRefs['usedByLinks']);
-        }
-
-        $dependencies = $crossRefs['dependencies'] ?? [];
-        if (!empty($dependencies)) {
-            $md .= $this->builder->section('Dependencies', 3, $this->builder->dependenciesList($dependencies));
+        if (!empty($crossRefs->getUsedByLinks())) {
+            $md .= $this->builder->usedBySection($crossRefs->getUsedByLinks());
         }
 
         return $md;

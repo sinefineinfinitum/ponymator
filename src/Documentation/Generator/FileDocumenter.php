@@ -2,7 +2,6 @@
 
 namespace SineFine\Ponymator\Documentation\Generator;
 
-
 use PhpParser\Node;
 use SineFine\Ponymator\Analyzer\DependencyAnalyzer;
 use SineFine\Ponymator\Analyzer\EntityExtractor;
@@ -11,6 +10,7 @@ use SineFine\Ponymator\Analyzer\Link\CrossReferenceContext;
 use SineFine\Ponymator\Analyzer\Parser;
 use SineFine\Ponymator\Documentation\Renderer\EntityRendererInterface;
 use SineFine\Ponymator\Documentation\Renderer\FileRenderer;
+use SineFine\Ponymator\Documentation\Generator\CrossReference;
 use SineFine\Ponymator\Filesystem\PathResolver;
 
 final class FileDocumenter
@@ -68,16 +68,21 @@ final class FileDocumenter
             $currentDocPath
         ) ?? [];
 
+        $typeLinkResolver = $linker !== null
+            ? fn(string $fqn): ?string => $linker->resolveTypeLink($fqn, $currentDocPath)
+            : fn(string $fqn): ?string => null;
+
         foreach ($entities as $entity) {
             $usedBy = $this->context?->getIndex()->getUsedBy(ltrim($entity['fqn'], '\\')) ?? [];
             $usedByLinks = $linker?->mapToLinks($usedBy, $currentDocPath) ?? [];
 
-            $content .= $this->renderEntityByType(
-                $entity, [
-                'dependencies' => $dependencies,
-                'usedByLinks' => $usedByLinks,
-                ]
+            $crossRef = new CrossReference(
+                $dependencies,
+                $usedByLinks,
+                $typeLinkResolver
             );
+
+            $content .= $this->renderEntityByType($entity, $crossRef);
         }
 
         return $content;
@@ -102,9 +107,9 @@ final class FileDocumenter
 
     /**
      * @param array<string, mixed> $entity
-     * @param array<string, mixed> $crossRefs
+     * @param CrossReference       $crossRefs
      */
-    private function renderEntityByType(array $entity, array $crossRefs): string
+    private function renderEntityByType(array $entity, CrossReference $crossRefs): string
     {
         foreach ($this->renderers as $renderer) {
             if ($renderer->supports($entity)) {

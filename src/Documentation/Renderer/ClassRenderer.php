@@ -2,6 +2,7 @@
 
 namespace SineFine\Ponymator\Documentation\Renderer;
 
+use SineFine\Ponymator\Documentation\Generator\CrossReference;
 use SineFine\Ponymator\Comparator\HashGenerator;
 
 final class ClassRenderer implements EntityRendererInterface
@@ -18,9 +19,9 @@ final class ClassRenderer implements EntityRendererInterface
 
     /**
      * @param array<string, mixed> $entity
-     * @param array<string, mixed> $crossRefs
+     * @param CrossReference       $crossRefs
      */
-    public function renderEntity(array $entity, array $crossRefs): string
+    public function renderEntity(array $entity, CrossReference $crossRefs): string
     {
         $content = $this->buildContent($entity, $crossRefs);
         $hash = HashGenerator::shortHash($content);
@@ -36,16 +37,34 @@ final class ClassRenderer implements EntityRendererInterface
 
     /**
      * @param array<string, mixed> $entity
-     * @param array<string, mixed> $crossRefs
+     * @param CrossReference       $crossRefs
      */
-    private function buildContent(array $entity, array $crossRefs): string
+    private function buildContent(array $entity, CrossReference $crossRefs): string
     {
+        $linkResolver = $crossRefs->getTypeLinkResolver();
+
         $md = "\n";
         $md .= $this->builder->header(1, '`' . $entity['fqn'] . '`');
         $md .= "\n";
 
-        $md .= $this->builder->header(3, 'Head');
-        $md .= $this->builder->kvList($this->typeAndModifiers($entity));
+        $typeLabel = trim(implode(' ', $entity['modifiers']) . ' class');
+
+        $parentLink = $entity['parentClass'] !== null
+            ? $linkResolver($entity['parentClass'])
+            : null;
+
+        $interfaceLinks = [];
+        foreach ($entity['interfaces'] as $interface) {
+            $interfaceLinks[] = $linkResolver($interface);
+        }
+
+        $md .= $this->builder->declarationLine(
+            $typeLabel,
+            $entity['parentClass'],
+            $parentLink,
+            $entity['interfaces'],
+            $interfaceLinks,
+        );
         $md .= "\n";
 
         if (!empty($entity['constants'])) {
@@ -53,44 +72,17 @@ final class ClassRenderer implements EntityRendererInterface
         }
 
         if (!empty($entity['properties'])) {
-            $md .= $this->builder->section('Properties', 3, $this->builder->propertiesTable($entity['properties']));
+            $md .= $this->builder->section('Properties', 3, $this->builder->propertiesList($entity['properties'], $linkResolver));
         }
 
         if (!empty($entity['methods'])) {
-            $md .= $this->builder->section('Methods', 3, $this->builder->methodsList($entity['methods']));
+            $md .= $this->builder->section('Methods', 3, $this->builder->methodsList($entity['methods'], $linkResolver));
         }
 
-        if (!empty($crossRefs['usedByLinks'])) {
-            $md .= $this->builder->usedBySection($crossRefs['usedByLinks']);
-        }
-
-        $dependencies = $crossRefs['dependencies'] ?? [];
-        if (!empty($dependencies)) {
-            $md .= $this->builder->section('Dependencies', 3, $this->builder->dependenciesList($dependencies));
+        if (!empty($crossRefs->getUsedByLinks())) {
+            $md .= $this->builder->usedBySection($crossRefs->getUsedByLinks());
         }
 
         return $md;
-    }
-
-    /**
-     * @param  array<string, mixed> $entity
-     * @return array<string, string>
-     */
-    private function typeAndModifiers(array $entity): array
-    {
-        $head = '`';
-        if (!empty($entity['modifiers'])) {
-            $head .= implode(' ', $entity['modifiers']) . ' ';
-        }
-        $head .= 'class`';
-
-        $parent = $entity['parentClass'] !== null ? '`' . $entity['parentClass'] . '`' : 'none';
-        $interfaces = !empty($entity['interfaces']) ? implode(', ', array_map(fn($i) => '`' . $i . '`', $entity['interfaces'])) : 'none';
-
-        return [
-            'Type' => $head,
-            'Parent' => $parent,
-            'Interfaces' => $interfaces,
-        ];
     }
 }
