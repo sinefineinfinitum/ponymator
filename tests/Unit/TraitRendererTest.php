@@ -100,6 +100,37 @@ final class TraitRendererTest extends TestCase
         $this->assertStringNotContainsString('### Head', $result);
     }
 
+    public function testRenderEntityCreatesSectionWithData(): void
+    {
+        $crossRefs = new CrossReference(
+            [], [], null, [
+            'init' => ['\App\Cache\RedisCache'],
+            ]
+        );
+        $result = $this->renderer->renderEntity($this->makeEntity(), $crossRefs);
+        $this->assertStringContainsString('### Creates', $result);
+        $this->assertStringContainsString('`init`', $result);
+        $this->assertStringContainsString('`\\App\\Cache\\RedisCache`', $result);
+    }
+
+    public function testRenderEntityNoCreatesSectionWhenEmpty(): void
+    {
+        $result = $this->renderer->renderEntity($this->makeEntity(), new CrossReference());
+        $this->assertStringNotContainsString('### Creates', $result);
+    }
+
+    public function testRenderEntityCreatesSectionDeterministic(): void
+    {
+        $crossRefs = new CrossReference(
+            [], [], null, [
+            'foo' => ['\App\A'],
+            ]
+        );
+        $first = $this->renderer->renderEntity($this->makeEntity(), $crossRefs);
+        $second = $this->renderer->renderEntity($this->makeEntity(), $crossRefs);
+        $this->assertSame($first, $second);
+    }
+
     public function testRenderEntityHashIsDeterministic(): void
     {
         $entity = $this->makeEntity();

@@ -3,8 +3,7 @@
 namespace SineFine\Ponymator;
 
 use InvalidArgumentException;
-use SineFine\Ponymator\Analyzer\DependencyAnalyzer;
-use SineFine\Ponymator\Analyzer\EntityExtractor;
+use SineFine\Ponymator\Analyzer\CombinedAnalyzer;
 use SineFine\Ponymator\Analyzer\FileExtractor;
 use SineFine\Ponymator\Analyzer\Link\CrossReferenceIndexBuilder;
 use SineFine\Ponymator\Analyzer\Parser;
@@ -37,9 +36,8 @@ class Ponymator
         $config = new Config($args->configPath);
 
         $parser = new Parser();
-        $entityExtractor = new EntityExtractor();
+        $combinedAnalyzer = new CombinedAnalyzer();
         $fileExtractor = new FileExtractor();
-        $dependencyAnalyzer = new DependencyAnalyzer();
         $builder = new MarkdownBuilder();
         $classRenderer = new ClassRenderer($builder);
         $interfaceRenderer = new InterfaceRenderer($builder);
@@ -51,9 +49,8 @@ class Ponymator
 
         $documenter = new FileDocumenter(
             $parser,
-            $entityExtractor,
+            $combinedAnalyzer,
             $fileExtractor,
-            $dependencyAnalyzer,
             [
                 $classRenderer,
                 $interfaceRenderer,

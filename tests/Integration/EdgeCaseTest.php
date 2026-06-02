@@ -3,8 +3,7 @@
 namespace SineFine\Ponymator\Tests\Integration;
 
 use PHPUnit\Framework\TestCase;
-use SineFine\Ponymator\Analyzer\DependencyAnalyzer;
-use SineFine\Ponymator\Analyzer\EntityExtractor;
+use SineFine\Ponymator\Analyzer\CombinedAnalyzer;
 use SineFine\Ponymator\Analyzer\FileExtractor;
 use SineFine\Ponymator\Analyzer\Link\CrossReferenceIndexBuilder;
 use SineFine\Ponymator\Analyzer\Parser;
@@ -59,9 +58,8 @@ final class EdgeCaseTest extends TestCase
     private function makeGenerator(Config $config): MarkdownGenerator
     {
         $parser = new Parser();
-        $entityExtractor = new EntityExtractor();
+        $combinedAnalyzer = new CombinedAnalyzer();
         $fileExtractor = new FileExtractor();
-        $dependencyAnalyzer = new DependencyAnalyzer();
         $builder = new MarkdownBuilder();
         $classRenderer = new ClassRenderer($builder);
         $interfaceRenderer = new InterfaceRenderer($builder);
@@ -73,9 +71,8 @@ final class EdgeCaseTest extends TestCase
         $indexBuilder = new CrossReferenceIndexBuilder($parser, $pathResolver);
         $documenter = new FileDocumenter(
             $parser,
-            $entityExtractor,
+            $combinedAnalyzer,
             $fileExtractor,
-            $dependencyAnalyzer,
             [
                 $classRenderer,
                 $interfaceRenderer,
