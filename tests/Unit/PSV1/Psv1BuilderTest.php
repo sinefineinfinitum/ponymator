@@ -116,6 +116,20 @@ final class Psv1BuilderTest extends TestCase
         $this->assertSame('$#readonly vectorStore:App\Storage\VectorStore' . PHP_EOL, $result);
     }
 
+    public function testPropertyStaticReadonly(): void
+    {
+        $property = [
+            'name' => 'config',
+            'visibility' => 'private',
+            'type' => 'array',
+            'defaultValue' => null,
+            'isStatic' => true,
+            'isReadonly' => true,
+        ];
+        $result = $this->builder->property($property);
+        $this->assertSame('$-static readonly config:array' . PHP_EOL, $result);
+    }
+
     public function testPropertyNoType(): void
     {
         $property = [

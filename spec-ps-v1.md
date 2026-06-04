@@ -18,7 +18,7 @@ Ready for import into graph databases and dependency analyzers.
 
 | Symbol / key | Meaning                                                               |
 |--------------|-----------------------------------------------------------------------|
-| `@`          | entity type (`class`, `interface`, `trait`, `enum`, `file`)           |
+| `@`          | entity type (`class`, `interface`, `trait`, `enum`, `file`) — reserved `@[a-z]+` for future entity types |
 | `>`          | extends                                                               |
 | `<`          | implements (entity level)                                             |
 | `$`          | property, parameter, global variable                                  |
@@ -38,7 +38,10 @@ Ready for import into graph databases and dependency analyzers.
 
 1. `?` MUST appear immediately after `:` and before the type name: `:?TypeName`.
 2. Keywords (`final`, `abstract`, `static`, `readonly`) MUST follow the entity or member name on the same line:
-`@class final Name`, `.+method static`.
+   - Entity header: `@class final Name`
+   - Method: `.+method static`
+   - Property: `$-readonly name`, `$+static readonly name`, `$#static name`
+   Keywords appear in alphabetical order when multiple are present.
 3. Indentation defines nesting: one level of exactly 4 spaces (MUST NOT use tabs) for children of a `.` block.
    Children include parameters, return type, and creates lines.
    - Correct: `    $param:int`
@@ -60,11 +63,24 @@ This section defines how Core maps to PHP.
 |--------|------------|
 | `%`    | trait use  |
 
+### Entity-type rules
+
+1. New entity types MUST use the `@[a-z]+` pattern and be registered in the symbol table.
+   Parsers MUST reject unknown `@` directives with a clear error.
+
+2. `@file` supports a **limited subset** of core symbols:
+   - Allowed: `$` (global variable), `!` (file constant), `.` (function), `:` (type), `=` (default value)
+   - Not allowed: `>`, `<`, `%`, `^`, `~`, `+`/`-`/`#`, `&`
+   These symbols are either OOP-specific or entity-level and have no meaning in
+   a procedural file context.
+
 ### Naming
 
 1. Names MUST use FQCN format (e.g. `App\Service\SearchService`) for all entity types except `@file`,
 which MUST use a file path relative to the project root.
-2. All primitives MUST be lowercase.
+2. Constant names MUST NOT start with `$`. The `$` prefix is reserved for properties, parameters,
+and global variables.
+3. All primitives MUST be lowercase.
 
 ### PHP primitives
 
@@ -146,11 +162,7 @@ This includes:
 
 PS uses **semantic versioning** for the syntax specification.
 
-The current version is **v1.0**. The version is embedded in the file header comment of generated files:
-
-```
-# PS v1.0
-```
+The current version is **v1.0**.
 
 ### Compatibility policy
 
