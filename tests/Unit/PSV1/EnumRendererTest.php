@@ -96,6 +96,23 @@ final class EnumRendererTest extends TestCase
         $this->assertStringContainsString('    :bool', $result);
     }
 
+    public function testRenderEntityMethodCreates(): void
+    {
+        $crossRefs = new CrossReference(
+            [], [], null, [
+            'isActive' => ['App\Result'],
+            ]
+        );
+        $result = $this->renderer->renderEntity($this->makeBackedEnum(), $crossRefs);
+        $this->assertStringContainsString('    ^App\Result', $result);
+    }
+
+    public function testRenderEntityNoCreatesWhenEmpty(): void
+    {
+        $result = $this->renderer->renderEntity($this->makeBackedEnum(), new CrossReference());
+        $this->assertStringNotContainsString('^', $result);
+    }
+
     public function testRenderEntityNoConstants(): void
     {
         $entity = $this->makeBackedEnum(['constants' => []]);

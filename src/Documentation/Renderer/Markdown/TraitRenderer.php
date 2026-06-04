@@ -51,6 +51,10 @@ final class TraitRenderer implements EntityRendererInterface
         $md .= $this->builder->declarationLine('trait', null, null, [], []);
         $md .= "\n";
 
+        if (!empty($entity['traits'])) {
+            $md .= $this->builder->section('Traits', 3, $this->builder->classList($entity['traits']));
+        }
+
         if (!empty($entity['constants'])) {
             $md .= $this->builder->section('Constants', 3, $this->builder->constantsTable($entity['constants']));
         }

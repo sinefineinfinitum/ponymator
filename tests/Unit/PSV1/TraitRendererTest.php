@@ -30,6 +30,35 @@ final class TraitRendererTest extends TestCase
         $this->assertStringContainsString('@trait App\Traits\LoggableTrait', $result);
     }
 
+    public function testRenderEntityTraits(): void
+    {
+        $entity = $this->makeEntity(['traits' => ['App\TimestampsTrait', 'App\CacheableTrait']]);
+        $result = $this->renderer->renderEntity($entity, new CrossReference());
+        $this->assertStringContainsString('%App\TimestampsTrait', $result);
+        $this->assertStringContainsString('%App\CacheableTrait', $result);
+    }
+
+    public function testRenderEntityNoTraits(): void
+    {
+        $result = $this->renderer->renderEntity($this->makeEntity(), new CrossReference());
+        $this->assertStringNotContainsString('%', $result);
+    }
+
+    public function testRenderEntityTraitsOrder(): void
+    {
+        $entity = $this->makeEntity(['traits' => ['App\A', 'App\B', 'App\C']]);
+        $result = $this->renderer->renderEntity($entity, new CrossReference());
+        $lines = explode(PHP_EOL, $result);
+        $posA = array_search('%App\A', $lines);
+        $posB = array_search('%App\B', $lines);
+        $posC = array_search('%App\C', $lines);
+        $this->assertNotFalse($posA);
+        $this->assertNotFalse($posB);
+        $this->assertNotFalse($posC);
+        $this->assertLessThan($posB, $posA);
+        $this->assertLessThan($posC, $posB);
+    }
+
     public function testRenderEntityConstants(): void
     {
         $entity = $this->makeEntity([
@@ -159,6 +188,7 @@ final class TraitRendererTest extends TestCase
             'modifiers' => [],
             'parentClass' => null,
             'interfaces' => [],
+            'traits' => [],
             'constants' => [],
             'properties' => [],
             'methods' => [

@@ -50,6 +50,11 @@ final class EnumRenderer implements EntityRendererInterface
             }
 
             $psv1 .= $this->builder->returnType($method['returnType'] ?? null);
+
+            $methodCreates = $crossRefs->getCreates()[$method['name']] ?? [];
+            foreach ($methodCreates as $createdType) {
+                $psv1 .= $this->builder->creates($createdType);
+            }
         }
 
         return $psv1;

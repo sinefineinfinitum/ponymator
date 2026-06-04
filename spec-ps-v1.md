@@ -119,6 +119,21 @@ Nullable is expressed via union with `null`:
     :User|null
 ```
 
+#### Trait with trait-use
+
+```
+@trait App\Traits\TimestampsTrait
+%App\Traits\LoggableTrait
+
+$+createdAt:\DateTimeImmutable
+
+.+touch
+    :void
+```
+
+Traits can use other traits via `%`. The order follows alphabetical sorting
+for deterministic output.
+
 #### Enum
 
 ```

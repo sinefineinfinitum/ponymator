@@ -25,6 +25,10 @@ final class TraitRenderer implements EntityRendererInterface
     {
         $psv1 = $this->builder->header($entity['type'], [], $entity['fqn']);
 
+        foreach ($entity['traits'] ?? [] as $trait) {
+            $psv1 .= $this->builder->traitUse($trait);
+        }
+
         foreach ($entity['constants'] as $constant) {
             $psv1 .= $this->builder->constant(
                 $constant['name'],
