@@ -64,7 +64,6 @@ This section defines how Core maps to PHP.
    - Not allowed: `>`, `<`, `%`, `^`, `~`, `+`/`-`/`#`, `&`
    These symbols are either OOP-specific or entity-level and have no meaning in
    a procedural file context.
-3. Anonymous classes are excluded from documentation.
 
 ### Naming
 
