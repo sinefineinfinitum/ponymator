@@ -50,12 +50,17 @@ final class EnumRenderer implements EntityRendererInterface
 
         $typeLabel = $entity['scalarType'] !== null ? 'backed enum' : 'enum';
 
+        $interfaceLinks = [];
+        foreach ($entity['interfaces'] as $interface) {
+            $interfaceLinks[] = $linkResolver($interface);
+        }
+
         $md .= $this->builder->declarationLine(
             $typeLabel,
             null,
             null,
-            [],
-            [],
+            $entity['interfaces'],
+            $interfaceLinks,
             $entity['scalarType'],
         );
         $md .= "\n";

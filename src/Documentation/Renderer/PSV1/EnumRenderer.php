@@ -29,6 +29,10 @@ final class EnumRenderer implements EntityRendererInterface
             $psv1 .= $this->builder->enumCase($case, $entity['scalarType']);
         }
 
+        foreach ($entity['interfaces'] as $interface) {
+            $psv1 .= $this->builder->implements($interface);
+        }
+
         foreach ($entity['constants'] as $constant) {
             $psv1 .= $this->builder->constant(
                 $constant['name'],

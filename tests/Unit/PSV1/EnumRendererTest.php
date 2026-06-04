@@ -30,6 +30,13 @@ final class EnumRendererTest extends TestCase
         $this->assertStringContainsString('@enum App\Status', $result);
     }
 
+    public function testRenderEntityInterfaces(): void
+    {
+        $entity = $this->makeBackedEnum(['interfaces' => ['App\Contracts\StatusInterface']]);
+        $result = $this->renderer->renderEntity($entity, new CrossReference());
+        $this->assertStringContainsString('<App\Contracts\StatusInterface', $result);
+    }
+
     public function testRenderEntityCasesBackedInt(): void
     {
         $result = $this->renderer->renderEntity($this->makeBackedEnum(), new CrossReference());
