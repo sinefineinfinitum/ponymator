@@ -140,6 +140,36 @@ final class TraitRendererTest extends TestCase
         $this->assertSame($first, $second);
     }
 
+    public function testRenderEntityReadonlyProperty(): void
+    {
+        $entity = $this->makeEntity([
+            'properties' => [
+                ['name' => 'cache', 'visibility' => 'protected', 'type' => 'array', 'defaultValue' => '[]', 'isStatic' => false, 'isReadonly' => true],
+            ],
+        ]);
+        $result = $this->renderer->renderEntity($entity, new CrossReference());
+        $this->assertStringContainsString('readonly', $result);
+    }
+
+    public function testRenderEntitySelfReturnType(): void
+    {
+        $entity = $this->makeEntity([
+            'methods' => [
+                [
+                    'name' => 'withConfig',
+                    'visibility' => 'public',
+                    'isStatic' => false,
+                    'isAbstract' => false,
+                    'parameters' => [],
+                    'returnType' => 'self',
+                    'returnTypeNullable' => false,
+                ],
+            ],
+        ]);
+        $result = $this->renderer->renderEntity($entity, new CrossReference());
+        $this->assertStringContainsString('self', $result);
+    }
+
     private function makeEntity(array $overrides = []): array
     {
         return array_merge(

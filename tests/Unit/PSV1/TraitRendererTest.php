@@ -81,6 +81,17 @@ final class TraitRendererTest extends TestCase
         $this->assertStringContainsString('$#logger:Psr\Log\LoggerInterface', $result);
     }
 
+    public function testRenderEntityReadonlyProperty(): void
+    {
+        $entity = $this->makeEntity([
+            'properties' => [
+                ['name' => 'cache', 'visibility' => 'protected', 'type' => 'array', 'defaultValue' => '[]', 'isStatic' => false, 'isReadonly' => true],
+            ],
+        ]);
+        $result = $this->renderer->renderEntity($entity, new CrossReference());
+        $this->assertStringContainsString('$#readonly cache:array=[]', $result);
+    }
+
     public function testRenderEntityMethods(): void
     {
         $result = $this->renderer->renderEntity($this->makeEntity(), new CrossReference());
@@ -146,6 +157,25 @@ final class TraitRendererTest extends TestCase
         $first = $this->renderer->renderEntity($entity, $crossRefs);
         $second = $this->renderer->renderEntity($entity, $crossRefs);
         $this->assertSame($first, $second);
+    }
+
+    public function testRenderEntitySelfReturnType(): void
+    {
+        $entity = $this->makeEntity([
+            'methods' => [
+                [
+                    'name' => 'withConfig',
+                    'visibility' => 'public',
+                    'isAbstract' => false,
+                    'isFinal' => false,
+                    'isStatic' => false,
+                    'parameters' => [],
+                    'returnType' => 'self',
+                ],
+            ],
+        ]);
+        $result = $this->renderer->renderEntity($entity, new CrossReference());
+        $this->assertStringContainsString('    :self', $result);
     }
 
     public function testRenderEntityOrderConstantsPropertiesMethods(): void
