@@ -169,6 +169,66 @@ class Hidden {
         $this->assertSame(1, $result->getSkipped());
     }
 
+    public function testEntityWithGlobalFunction(): void
+    {
+        file_put_contents(
+            $this->sourceDir . '/Service.php', '<?php
+
+class Service {
+    public function process(): void {}
+}
+
+function helper(string $name): string {
+    return "Hello, $name!";
+}'
+        );
+
+        $config = $this->makeConfig();
+        $generator = $this->makeGenerator($config);
+
+        $scanner = new Scanner($this->sourceDir);
+        $files = $scanner->scan();
+        $generator->generateFull($files);
+
+        $this->assertFileExists($this->targetDir . '/Service.md');
+        $content = file_get_contents($this->targetDir . '/Service.md');
+
+        $this->assertStringContainsString('type: class', $content);
+        $this->assertStringContainsString('`Service`', $content);
+        $this->assertStringContainsString('process', $content);
+        $this->assertStringContainsString('Global functions', $content);
+        $this->assertStringContainsString('helper', $content);
+    }
+
+    public function testEntityWithGlobalConstants(): void
+    {
+        file_put_contents(
+            $this->sourceDir . '/Config.php', '<?php
+
+class Config {
+    public function get(string $key): mixed {}
+}
+
+define("APP_NAME", "Ponymator");
+define("APP_VERSION", "1.0");'
+        );
+
+        $config = $this->makeConfig();
+        $generator = $this->makeGenerator($config);
+
+        $scanner = new Scanner($this->sourceDir);
+        $files = $scanner->scan();
+        $generator->generateFull($files);
+
+        $this->assertFileExists($this->targetDir . '/Config.md');
+        $content = file_get_contents($this->targetDir . '/Config.md');
+
+        $this->assertStringContainsString('type: class', $content);
+        $this->assertStringContainsString('Global constants', $content);
+        $this->assertStringContainsString('APP_NAME', $content);
+        $this->assertStringContainsString('APP_VERSION', $content);
+    }
+
     private function rmdir(string $dir): void
     {
         if (!is_dir($dir)) {
