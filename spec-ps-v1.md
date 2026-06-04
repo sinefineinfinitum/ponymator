@@ -39,7 +39,10 @@ Ready for import into graph databases and dependency analyzers.
 1. `?` MUST appear immediately after `:` and before the type name: `:?TypeName`.
 2. Keywords (`final`, `abstract`, `static`, `readonly`) MUST follow the entity or member name on the same line:
 `@class final Name`, `.+method static`.
-3. Indentation defines nesting: one level of indentation (4 spaces) for children of a `.` block.
+3. Indentation defines nesting: one level of exactly 4 spaces (MUST NOT use tabs) for children of a `.` block.
+   Children include parameters, return type, and creates lines.
+   - Correct: `    $param:int`
+   - Incorrect: `\t$param:int` or `  $param:int`
 4. One line per declaration — no inlining of methods, properties, or constants.
 5. `<` and `>` at the start of a directive line mean `implements` / `extends`. Within a type expression after `:`,
 the same characters are part of generic type syntax (e.g. `Collection<User>`, `array<string,int>`)
@@ -123,3 +126,49 @@ $-mixedResult:int|string|null
 
 $debugMode:bool=false
 ```
+
+---
+
+## File extension
+
+Generated PS v1.0 documentation files use the **`.psv1`** extension.
+
+Output files mirror the source directory structure. For a source file at `src/Service/SearchService.php`,
+the generated documentation is written to `target/Service/SearchService.psv1`.
+
+This includes:
+- Entity files (classes, interfaces, traits, enums) — output path mirrors the source `.php` location
+- File documentation (procedural files) — same source-to-output mapping
+
+---
+
+## Versioning
+
+PS uses **semantic versioning** for the syntax specification.
+
+The current version is **v1.0**. The version is embedded in the file header comment of generated files:
+
+```
+# PS v1.0
+```
+
+### Compatibility policy
+
+| Change type | Version bump | Examples |
+|---|---|---|
+| Addition (backward-compatible) | Minor (v1.0 → v1.1) | New symbol, new optional keyword |
+| Fix (no syntax change) | Patch (v1.0 → v1.0.1) | Clarified wording, corrected example |
+| Breaking change | Major (v1.0 → v2.0) | Symbol repurposing, removal, changed meaning |
+
+### Breaking changes (v2.0+)
+
+The following would trigger a major version bump:
+
+- Changing the meaning of an existing symbol.
+- Removing or renaming a symbol.
+- Changing indentation rules.
+- Making a previously required element optional or vice versa.
+
+Non-breaking additions (minor version) must not change the interpretation of any valid v1.0
+document. Parsers written for v1.0 MUST be able to safely ignore unknown optional elements
+introduced in v1.1, v1.2, etc.

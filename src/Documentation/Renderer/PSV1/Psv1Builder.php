@@ -109,6 +109,10 @@ final class Psv1Builder
     }
     
     /**
+     * Parameter line indented 4 spaces under its method/function.
+     *
+     * PSV1 rule: one level of indentation (4 spaces) for children of a `.` block.
+     *
      * @param array<string, mixed> $parameter
      */
     public function parameter(array $parameter): string
@@ -132,6 +136,9 @@ final class Psv1Builder
         return $line . PHP_EOL;
     }
 
+    /**
+     * Return type line indented 4 spaces under its method.
+     */
     public function returnType(?string $type): string
     {
         if ($type === null) {
@@ -141,6 +148,9 @@ final class Psv1Builder
         return '    :' . $this->type($type) . PHP_EOL;
     }
 
+    /**
+     * Creates line indented 4 spaces under its method.
+     */
     public function creates(string $type): string
     {
         return '    ^' . $type . PHP_EOL;
