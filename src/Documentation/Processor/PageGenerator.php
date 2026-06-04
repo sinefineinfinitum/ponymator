@@ -11,7 +11,7 @@ use SineFine\Ponymator\Analyzer\Parser;
 use SineFine\Ponymator\Documentation\Linker\CrossReference;
 use SineFine\Ponymator\Documentation\Linker\CrossReferenceFactory;
 use SineFine\Ponymator\Documentation\Renderer\EntityRendererInterface;
-use SineFine\Ponymator\Documentation\Renderer\FileRenderer;
+use SineFine\Ponymator\Documentation\Renderer\FileRendererInterface;
 
 final class PageGenerator
 {
@@ -22,7 +22,7 @@ final class PageGenerator
      * @param CombinedAnalyzer          $combinedAnalyzer
      * @param FileExtractor             $fileExtractor
      * @param EntityRendererInterface[] $renderers
-     * @param FileRenderer              $fileRenderer
+     * @param FileRendererInterface     $fileRenderer
      * @param CrossReferenceFactory     $crossReferenceFactory
      */
     public function __construct(
@@ -30,7 +30,7 @@ final class PageGenerator
         private CombinedAnalyzer $combinedAnalyzer,
         private FileExtractor $fileExtractor,
         private array $renderers,
-        private FileRenderer $fileRenderer,
+        private FileRendererInterface $fileRenderer,
         private CrossReferenceFactory $crossReferenceFactory,
     ) {
     }

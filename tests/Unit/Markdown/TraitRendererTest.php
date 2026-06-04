@@ -1,11 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace SineFine\Ponymator\Tests\Unit;
+namespace SineFine\Ponymator\Tests\Unit\Markdown;
 
 use PHPUnit\Framework\TestCase;
 use SineFine\Ponymator\Documentation\Linker\CrossReference;
-use SineFine\Ponymator\Documentation\Renderer\MarkdownBuilder;
-use SineFine\Ponymator\Documentation\Renderer\TraitRenderer;
+use SineFine\Ponymator\Documentation\Renderer\Markdown\MarkdownBuilder;
+use SineFine\Ponymator\Documentation\Renderer\Markdown\TraitRenderer;
 
 final class TraitRendererTest extends TestCase
 {
