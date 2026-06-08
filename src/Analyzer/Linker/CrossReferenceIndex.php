@@ -2,7 +2,7 @@
 
 namespace SineFine\Ponymator\Analyzer\Linker;
 
-use RuntimeException;
+use SineFine\Ponymator\Analyzer\ParserException;
 
 final class CrossReferenceIndex
 {
@@ -19,12 +19,12 @@ final class CrossReferenceIndex
     private bool $frozen = false;
 
     /**
-     * @throws RuntimeException
+     * @throws ParserException
      */
     public function addReference(string $referencedFqn, string $referencingFqn): void
     {
         if ($this->frozen) {
-            throw new RuntimeException('CrossReferenceIndex is frozen after build');
+            throw new ParserException('CrossReferenceIndex is frozen after build');
         }
         if ($referencedFqn === $referencingFqn) {
             return;
