@@ -37,10 +37,6 @@ class EntityExtractingVisitor extends NodeVisitorAbstract
      */
     public function entities(): array
     {
-        $entities = $this->entities;
-
-        usort($entities, fn($a, $b) => strcmp($a['fqn'], $b['fqn']));
-
-        return $entities;
+        return $this->entities;
     }
 }

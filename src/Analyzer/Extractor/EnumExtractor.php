@@ -55,7 +55,6 @@ final class EnumExtractor implements EntityExtractorInterface
                 ];
             }
         }
-        usort($cases, fn($a, $b) => strcmp($a['name'], $b['name']));
         return $cases;
     }
 

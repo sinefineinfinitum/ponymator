@@ -44,7 +44,6 @@ final class AstHelper
                 ];
             }
         }
-        usort($constants, fn($a, $b) => strcmp($a['name'], $b['name']));
         return $constants;
     }
 
@@ -80,7 +79,6 @@ final class AstHelper
                 'returnTypeNullable' => $method->returnType instanceof NullableType,
             ];
         }
-        usort($methods, fn($a, $b) => strcmp($a['name'], $b['name']));
         return $methods;
     }
 
@@ -126,7 +124,6 @@ final class AstHelper
             }
         }
 
-        usort($properties, fn($a, $b) => strcmp($a['name'], $b['name']));
         return $properties;
     }
 
