@@ -82,19 +82,29 @@ hash: 3d8f1b2c9a0e
 
 ## Methods
 
-- public static function create(string $name, array $data = []): App\Models\User
-- public function findById(int $id, ?bool $active = true): ?App\Models\User
+- `public static function create(``string`` $name``, ``array`` $data = []``): ``App\Models\User`
+  - **Creates:**
+    - [App\Models\User](../Models/User.md)
+  - **Calls:**
+    - `strong` `App\Service\Logger::log`
+    - `strong` [App\Models\User](../Models/User.md)->save
+    - `weak` `handleException`
 
 ## Used by
 
 - [App\Contract\ServiceInterface](..\Contract\ServiceInterface.md)
 - `Vendor\Package\SomeClass`
-
-## Creates
-
-- `create`: [`App\Models\User`](..\Models\User.md)
-- `findById`: [`App\Models\User`](..\Models\User.md)
 ````
+
+### Markdown Call Graph & Object Creation Rules
+
+1. **Method-Nested Structure**: No global `Creates` or `Call Graph` sections. Object creations (`Creates`) and method calls (`Calls`) are nested directly under their respective method signature.
+2. **Human-Readable Association**: Compact symbols (`*`, `?`) are replaced with explicit labels: `` `strong` `` or `` `weak` ``.
+3. **No Unknown Targets**: `Unknown` targets are excluded. Unresolved calls list only the called name (labeled `` `weak` ``).
+4. **Call Operator Notation**: Type of call is implied by PHP syntax instead of text tags:
+   - Static: `Class::method`
+   - Dynamic: `Class->method`
+5. **No Duplication**: Instantiations via `new` are listed only under `Creates` and excluded from `Calls`.
 
 ## Requirements
 
