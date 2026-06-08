@@ -78,7 +78,11 @@ final class EnumRenderer implements EntityRendererInterface
         }
 
         if (!empty($entity['methods'])) {
-            $md .= $this->builder->section('Methods', 3, $this->builder->methodsList($entity['methods'], $linkResolver));
+            $md .= $this->builder->section(
+                'Methods',
+                3,
+                $this->builder->methodsList($entity['methods'], $linkResolver, [], $crossRefs->getCalls())
+            );
         }
 
         if (!empty($crossRefs->getUsedByLinks())) {

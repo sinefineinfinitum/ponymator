@@ -2,7 +2,7 @@
 
 namespace SineFine\Ponymator\Documentation\Linker;
 
-use SineFine\Ponymator\Analyzer\CombinedAnalysisResult;
+use SineFine\Ponymator\Analyzer\EntityAnalysisResult;
 use SineFine\Ponymator\Analyzer\Linker\CrossReferenceContext;
 use SineFine\Ponymator\Filesystem\PathResolver;
 
@@ -14,9 +14,9 @@ final class CrossReferenceFactory
     }
 
     public function create(
-        CombinedAnalysisResult $analysis,
+        EntityAnalysisResult   $analysis,
         ?CrossReferenceContext $context,
-        string $relativePath,
+        string                 $relativePath,
     ): CrossReferenceProvider {
         $currentDocPath = $this->pathResolver->docRelativePath($relativePath);
         $linker = $context !== null

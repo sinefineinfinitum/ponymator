@@ -8,9 +8,6 @@ use PhpParser\ParserFactory;
 use PhpParser\Parser as PhpParser;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor\NameResolver;
-use RuntimeException;
-
-use SineFine\Ponymator\Analyzer\ParserException;
 
 class Parser
 {

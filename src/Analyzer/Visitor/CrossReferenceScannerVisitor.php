@@ -11,6 +11,7 @@ use PhpParser\Node\Param;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\ClassLike;
 use PhpParser\Node\Stmt\Enum_;
+use PhpParser\Node\Stmt\Function_;
 use PhpParser\Node\Stmt\Interface_;
 use PhpParser\Node\Stmt\Property;
 use PhpParser\Node\Stmt\TraitUse;
@@ -35,10 +36,23 @@ final class CrossReferenceScannerVisitor extends NodeVisitorAbstract
      */
     private array $entityFqns = [];
 
+    /**
+     * @var list<string>
+     */
+    private array $functionFqns = [];
+
     private ?string $currentEntity = null;
 
     public function enterNode(Node $node)
     {
+        if ($node instanceof Function_) {
+            if ($node->namespacedName !== null) {
+                $this->functionFqns[] = $node->namespacedName->toString();
+            } else {
+                $this->functionFqns[] = $node->name->toString();
+            }
+        }
+
         if ($node instanceof ClassLike && $node->namespacedName !== null) {
             if ($node instanceof Class_ && $node->isAnonymous()) {
                 return null;
@@ -111,6 +125,14 @@ final class CrossReferenceScannerVisitor extends NodeVisitorAbstract
     public function getEntityFqns(): array
     {
         return $this->entityFqns;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function getFunctionFqns(): array
+    {
+        return $this->functionFqns;
     }
     private function addReference(Name $name, string $referencingFqn): void
     {

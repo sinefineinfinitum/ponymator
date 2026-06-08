@@ -9,7 +9,8 @@
     ],
     "require": {
         "php": "^8.0",
-        "nikic/php-parser": "^5.7"
+        "nikic/php-parser": "^5.7",
+        "sinefineinfinitum/parser-ps": "v0.0.1"
     },
     "autoload": {
         "psr-4": {
@@ -21,5 +22,10 @@
         "phpunit/phpunit": "^10.5.0",
         "phpstan/phpstan": "^2.2",
         "squizlabs/php_codesniffer": "^4.0"
-    }
+    },
+    "repositories": [{
+        "name": "parser-ps",
+        "type": "vcs",
+        "url": "https://github.com/sinefineinfinitum/parser-ps"
+    }]
 }

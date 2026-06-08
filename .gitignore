@@ -1,5 +1,6 @@
 *.phar
 vendor
+benchmark
 .idea
 .opencode
 .specify
@@ -8,3 +9,4 @@ docs
 *.log
 .phpunit.result.cache
 .phpunit.cache
+.editorconfig

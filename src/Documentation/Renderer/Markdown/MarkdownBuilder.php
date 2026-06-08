@@ -2,6 +2,8 @@
 
 namespace SineFine\Ponymator\Documentation\Renderer\Markdown;
 
+use SineFine\Ponymator\Analyzer\CallInfo;
+
 final class MarkdownBuilder
 {
     /**
@@ -50,14 +52,15 @@ final class MarkdownBuilder
     }
 
     /**
-     * @param string          $typeLabel
-     * @param string|null     $parentFqn
-     * @param string|null     $parentLink
-     * @param string[]        $interfaceFqns
-     * @param (string|null)[] $interfaceLinks
-     * @param string|null     $backingType
-     * @param string          $extendsWord
-     * @param string          $implementsWord
+     * @param  string          $typeLabel
+     * @param  string|null     $parentFqn
+     * @param  string|null     $parentLink
+     * @param  string[]        $interfaceFqns
+     * @param  (string|null)[] $interfaceLinks
+     * @param  string|null     $backingType
+     * @param  string          $extendsWord
+     * @param  string          $implementsWord
+     * @return string
      */
     public function declarationLine(string $typeLabel, ?string $parentFqn = null, ?string $parentLink = null, array $interfaceFqns = [], array $interfaceLinks = [], ?string $backingType = null, string $extendsWord = 'extends', string $implementsWord = 'implements'): string
     {
@@ -277,14 +280,82 @@ final class MarkdownBuilder
     /**
      * @param array<int, array<string, mixed>> $methods
      * @param callable(string): ?string        $typeLinkResolver
+     * @param array<string, list<string>>      $creates          methodName => list<fqcn>
+     * @param array<string, list<CallInfo>>    $calls            methodName => list<CallInfo>
      */
-    public function methodsList(array $methods, callable $typeLinkResolver): string
+    public function methodsList(array $methods, callable $typeLinkResolver, array $creates = [], array $calls = []): string
     {
         $result = '';
         foreach ($methods as $method) {
+            $methodName = $method['name'];
             $result .= $this->listItem($this->renderMethodSignature($method, $typeLinkResolver));
+
+            $methodCreates = $creates[$methodName] ?? [];
+            $methodCalls = array_values(
+                array_filter(
+                    $calls[$methodName] ?? [],
+                    fn(CallInfo $c) => $c->kind !== CallInfo::KIND_CREATE
+                )
+            );
+
+            if (!empty($methodCreates)) {
+                $result .= $this->listItem('**Creates:**', '  -');
+                foreach ($methodCreates as $fqcn) {
+                    $link = $typeLinkResolver(ltrim($fqcn, '\\'));
+                    if ($link !== null) {
+                        $result .= $this->listItem('[' . ltrim($fqcn, '\\') . '](' . $link . ')', '    -');
+                    } else {
+                        $result .= $this->listItem($this->inlineCode(ltrim($fqcn, '\\')), '    -');
+                    }
+                }
+            }
+
+            if (!empty($methodCalls)) {
+                $result .= $this->listItem('**Calls:**', '  -');
+                foreach ($methodCalls as $callInfo) {
+                    $result .= $this->listItem($this->renderCallInfo($callInfo, $typeLinkResolver), '    -');
+                }
+            }
         }
         return $result;
+    }
+
+    /**
+     * @param  CallInfo                  $callInfo
+     * @param  callable(string): ?string $linkResolver
+     * @return string
+     */
+    private function renderCallInfo(CallInfo $callInfo, callable $linkResolver): string
+    {
+        $assocLabel = $callInfo->association === CallInfo::STRONG ? 'strong' : 'weak';
+        $prefix = $this->inlineCode($assocLabel);
+
+        $resolved = $callInfo->resolvedTargetFqcn;
+
+        if ($resolved === null) {
+            return $prefix . ' ' . $this->inlineCode($callInfo->targetName);
+        }
+
+        $separator = str_contains($resolved, '::')
+            ? '::' : (str_contains($resolved, '->') ? '->'
+            : null);
+
+        if ($separator !== null) {
+            [$classFqn, $member] = explode($separator, $resolved, 2);
+            $classFqn = ltrim($classFqn, '\\');
+            $link = $linkResolver($classFqn);
+            $classPart = $link !== null
+                ? '[' . $classFqn . '](' . $link . ')'
+                : $this->inlineCode($classFqn);
+            return $prefix . ' ' . $classPart . $separator . $this->inlineCode($member);
+        }
+
+        $cleanResolved = ltrim($resolved, '\\');
+        $link = $linkResolver($cleanResolved);
+        if ($link !== null) {
+            return $prefix . ' [' . $cleanResolved . '](' . $link . ')';
+        }
+        return $prefix . ' ' . $this->inlineCode($cleanResolved);
     }
 
     /**

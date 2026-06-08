@@ -2,11 +2,14 @@
 
 namespace SineFine\Ponymator\Documentation\Processor;
 
-use SineFine\Ponymator\Analyzer\CombinedAnalysisResult;
-use SineFine\Ponymator\Analyzer\CombinedAnalyzer;
+use SineFine\Ponymator\Analyzer\CallInfo;
+use SineFine\Ponymator\Analyzer\EntityAnalysisResult;
+use SineFine\Ponymator\Analyzer\EntityAnalyzer;
 use SineFine\Ponymator\Analyzer\FileExtractor;
 use SineFine\Ponymator\Analyzer\Linker\CrossReferenceContext;
 use SineFine\Ponymator\Analyzer\Parser;
+use SineFine\Ponymator\Analyzer\CallAnalysisResult;
+use SineFine\Ponymator\Analyzer\CallAnalyzer;
 use SineFine\Ponymator\Documentation\Linker\CrossReference;
 use SineFine\Ponymator\Documentation\Linker\CrossReferenceFactory;
 use SineFine\Ponymator\Documentation\Renderer\EntityRendererInterface;
@@ -16,29 +19,45 @@ final class PageGenerator
 {
     private ?CrossReferenceContext $context = null;
 
+    private ?CallAnalysisResult $callAnalysisResult = null;
+
     /**
      * @param Parser                    $parser
-     * @param CombinedAnalyzer          $combinedAnalyzer
+     * @param EntityAnalyzer            $entityAnalyzer
      * @param FileExtractor             $fileExtractor
      * @param EntityRendererInterface[] $renderers
      * @param FileRendererInterface     $fileRenderer
      * @param CrossReferenceFactory     $crossReferenceFactory
+     * @param CallAnalyzer|null         $callAnalyzer
      */
     public function __construct(
-        private Parser $parser,
-        private CombinedAnalyzer $combinedAnalyzer,
-        private FileExtractor $fileExtractor,
-        private array $renderers,
+        private Parser                $parser,
+        private EntityAnalyzer        $entityAnalyzer,
+        private FileExtractor         $fileExtractor,
+        private array                 $renderers,
         private FileRendererInterface $fileRenderer,
         private CrossReferenceFactory $crossReferenceFactory,
+        private ?CallAnalyzer         $callAnalyzer = null,
     ) {
     }
 
     public function document(string $sourcePath, string $relativePath): string
     {
         $ast = $this->parser->parseFile($sourcePath);
-        $analysis = $this->combinedAnalyzer->analyze($ast);
-        $entities = $analysis->getEntities();
+        $entityAnalysis = $this->entityAnalyzer->analyze($ast);
+        $entities = $entityAnalysis->getEntities();
+
+        $fileCalls = [];
+        if ($this->callAnalyzer !== null) {
+            $projectFunctions = $this->context?->getProjectFunctions() ?? [];
+            $this->callAnalysisResult = $this->callAnalyzer->analyzeAst($ast, $projectFunctions);
+            $entityAnalysis = $this->mergeCallsIntoEntityAnalysis(
+                $entityAnalysis,
+                $this->callAnalysisResult->getCalls(),
+                $this->callAnalysisResult->getFileCalls(),
+            );
+            $fileCalls = $this->callAnalysisResult->getFileCalls();
+        }
 
         $functions = $this->fileExtractor->extractFunctions($ast);
         $globals = $this->fileExtractor->extractGlobals($ast);
@@ -49,7 +68,7 @@ final class PageGenerator
         $content = '';
 
         if ($entities !== []) {
-            $content .= $this->renderEntities($analysis, $entities, $relativePath);
+            $content .= $this->renderEntities($entityAnalysis, $entities, $relativePath);
         }
 
         if ($hasFileLevel) {
@@ -58,6 +77,7 @@ final class PageGenerator
                 $functions,
                 $globals,
                 $constants,
+                $fileCalls,
             );
         }
 
@@ -70,12 +90,32 @@ final class PageGenerator
     }
 
     /**
-     * @param  CombinedAnalysisResult           $analysis
+     * @param  EntityAnalysisResult                         $analysis
+     * @param  array<string, array<string, list<CallInfo>>> $calls
+     * @param  array<string, list<CallInfo>>                $fileCalls
+     * @return EntityAnalysisResult
+     */
+    private function mergeCallsIntoEntityAnalysis(
+        EntityAnalysisResult $analysis,
+        array                $calls,
+        array                $fileCalls = []
+    ): EntityAnalysisResult {
+        return new EntityAnalysisResult(
+            entities: $analysis->getEntities(),
+            dependencies: $analysis->getDependencies(),
+            creations: $analysis->getCreations(),
+            calls: $calls,
+            fileCalls: $fileCalls,
+        );
+    }
+
+    /**
+     * @param  EntityAnalysisResult             $analysis
      * @param  array<int, array<string, mixed>> $entities
      * @param  string                           $relativePath
      * @return string
      */
-    private function renderEntities(CombinedAnalysisResult $analysis, array $entities, string $relativePath): string
+    private function renderEntities(EntityAnalysisResult $analysis, array $entities, string $relativePath): string
     {
         $content = '';
         $refProvider = $this->crossReferenceFactory->create($analysis, $this->context, $relativePath);
