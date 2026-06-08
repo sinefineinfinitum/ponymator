@@ -2,7 +2,7 @@
 
 namespace SineFine\Ponymator\Documentation\Linker;
 
-use SineFine\Ponymator\Analyzer\CombinedAnalysisResult;
+use SineFine\Ponymator\Analyzer\EntityAnalysisResult;
 use SineFine\Ponymator\Analyzer\Linker\CrossReferenceContext;
 
 final class CrossReferenceProvider
@@ -18,10 +18,10 @@ final class CrossReferenceProvider
     private $typeLinkResolver;
 
     public function __construct(
-        private CombinedAnalysisResult $analysis,
+        private EntityAnalysisResult   $analysis,
         private ?CrossReferenceContext $context,
-        private ?DocLinker $linker,
-        private string $currentDocPath
+        private ?DocLinker             $linker,
+        private string                 $currentDocPath
     ) {
         $this->dependencies = $this->linker?->mapToLinks(
             $this->analysis->getDependencies(),
@@ -39,12 +39,14 @@ final class CrossReferenceProvider
         $usedByLinks = $this->linker?->mapToLinks($usedBy, $this->currentDocPath) ?? [];
 
         $creations = $this->analysis->getCreations()[$fqn] ?? [];
+        $calls = $this->analysis->getCalls()[$fqn] ?? [];
 
         return new CrossReference(
             $this->dependencies,
             $usedByLinks,
             $this->typeLinkResolver,
-            $creations
+            $creations,
+            $calls,
         );
     }
 }

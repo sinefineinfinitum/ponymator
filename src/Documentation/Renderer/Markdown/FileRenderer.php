@@ -13,16 +13,23 @@ final class FileRenderer implements FileRendererInterface
     }
 
     /**
-     * @param string                           $relativePath
-     * @param array<int, array<string, mixed>> $functions
-     * @param string[]                         $globals
-     * @param array<int, array<string, mixed>> $constants
+     * @param  string                                                     $relativePath
+     * @param  array<int, array<string, mixed>>                           $functions
+     * @param  string[]                                                   $globals
+     * @param  array<int, array<string, mixed>>                           $constants
+     * @param  array<string, list<\SineFine\Ponymator\Analyzer\CallInfo>> $fileCalls    functionName => list<CallInfo>
+     * @return string
      */
-    public function renderFile(string $relativePath, array $functions, array $globals, array $constants): string
-    {
+    public function renderFile(
+        string $relativePath,
+        array $functions,
+        array $globals,
+        array $constants,
+        array $fileCalls = []
+    ): string {
         $content = '';
         if (!empty($functions)) {
-            $content .= $this->builder->section('Global functions', 3, $this->functionsList($functions));
+            $content .= $this->builder->section('Global functions', 3, $this->functionsList($functions, $fileCalls));
         }
         if (!empty($globals)) {
             $content .= $this->builder->section('Global variables', 3, $this->globalsList($globals));
@@ -49,6 +56,48 @@ final class FileRenderer implements FileRendererInterface
     }
 
     /**
+     * @param  array<int, array<string, mixed>>                           $functions
+     * @param  array<string, list<\SineFine\Ponymator\Analyzer\CallInfo>> $fileCalls
+     * @return string
+     */
+    private function functionsList(array $functions, array $fileCalls = []): string
+    {
+        $result = '';
+        $linkResolver = fn(string $fqn): ?string => null;
+        foreach ($functions as $fn) {
+            $sig = $this->builder->methodSignature($fn);
+            $fnName = $fn['name'];
+
+            $result .= $this->builder->header(4, $fnName);
+            $result .= $this->builder->codeBlock($sig, 'php');
+
+            $calls = $fileCalls[$fnName] ?? [];
+            $methodCalls = array_values(
+                array_filter(
+                    $calls,
+                    fn(\SineFine\Ponymator\Analyzer\CallInfo $c) => $c->kind !== \SineFine\Ponymator\Analyzer\CallInfo::KIND_CREATE
+                )
+            );
+
+            if (!empty($methodCalls)) {
+                $result .= $this->builder->listItem('**Calls:**');
+                foreach ($methodCalls as $callInfo) {
+                    $assocLabel = $callInfo->association === \SineFine\Ponymator\Analyzer\CallInfo::STRONG ? 'strong' : 'weak';
+                    $prefix = $this->builder->inlineCode($assocLabel);
+
+                    $resolved = $callInfo->resolvedTargetFqcn;
+                    if ($resolved === null) {
+                        $result .= $this->builder->listItem($prefix . ' ' . $this->builder->inlineCode($callInfo->targetName), '  -');
+                    } else {
+                        $result .= $this->builder->listItem($prefix . ' ' . $this->builder->inlineCode($resolved), '  -');
+                    }
+                }
+            }
+        }
+        return $result;
+    }
+
+    /**
      * @param array<int, array<string, mixed>> $constants
      */
     private function constantsList(array $constants): string
@@ -59,21 +108,6 @@ final class FileRenderer implements FileRendererInterface
             $rows[] = ['`' . $c['name'] . '`', '`' . $value . '`'];
         }
         return $this->builder->table(['Name', 'Value'], $rows);
-    }
-
-    /**
-     * @param array<int, array<string, mixed>> $functions
-     */
-    private function functionsList(array $functions): string
-    {
-        $result = '';
-        foreach ($functions as $fn) {
-            $sig = $this->builder->methodSignature($fn);
-
-            $result .= $this->builder->header(4, $fn['name']);
-            $result .= $this->builder->codeBlock($sig, 'php');
-        }
-        return $result;
     }
 
     /**

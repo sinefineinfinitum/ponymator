@@ -81,10 +81,12 @@ final class ClassRenderer implements EntityRendererInterface
         }
 
         if (!empty($entity['methods'])) {
-            $md .= $this->builder->section('Methods', 3, $this->builder->methodsList($entity['methods'], $linkResolver));
+            $md .= $this->builder->section(
+                'Methods',
+                3,
+                $this->builder->methodsList($entity['methods'], $linkResolver, $crossRefs->getCreates(), $crossRefs->getCalls())
+            );
         }
-
-        $md .= $this->builder->section('Creates', 3, $this->builder->createsSection($crossRefs->getCreates(), $linkResolver));
 
         if (!empty($crossRefs->getUsedByLinks())) {
             $md .= $this->builder->usedBySection($crossRefs->getUsedByLinks());
