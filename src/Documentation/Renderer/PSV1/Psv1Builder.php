@@ -287,7 +287,7 @@ final class Psv1Builder
         $value = str_replace(["\r\n", "\r", "\n"], '\n', $value);
         $value = str_replace(['<', '>'], '', $value);
         $value = str_replace("\t", '\t', $value);
-        $value = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $value);
+        $value = preg_replace('/[\x00-\x1F\x7F]/', '', $value);
 
         $limit = $isQuoted ? self::MAX_VALUE_LENGTH - 4 : self::MAX_VALUE_LENGTH - 3;
         if (mb_strlen($value) > $limit) {
