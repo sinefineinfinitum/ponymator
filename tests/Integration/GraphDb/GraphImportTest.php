@@ -38,9 +38,17 @@ final class GraphImportTest extends TestCase
     public function testImportFromDocsDirectory(): void
     {
         $docsDir = dirname(__DIR__, 3) . '/docs';
+        if (!is_dir($docsDir)) {
+            $docsDir = __DIR__ . '/Fixtures/psv1';
+        }
+
+        if (!is_dir($docsDir)) {
+            $this->markTestSkipped('Neither docs/ nor fixtures found');
+        }
+
         $files = $this->getAllPsv1Files($docsDir);
 
-        $this->assertNotEmpty($files, 'No .psv1 files found in docs/');
+        $this->assertNotEmpty($files, 'No .psv1 files found');
 
         $command = new GraphCommand($this->pdo);
         $query = new GraphQuery($this->pdo);
@@ -59,6 +67,14 @@ final class GraphImportTest extends TestCase
     public function testImportIsIdempotent(): void
     {
         $docsDir = dirname(__DIR__, 3) . '/docs';
+        if (!is_dir($docsDir)) {
+            $docsDir = __DIR__ . '/Fixtures/psv1';
+        }
+
+        if (!is_dir($docsDir)) {
+            $this->markTestSkipped('Neither docs/ nor fixtures found');
+        }
+
         $files = $this->getAllPsv1Files($docsDir);
 
         $command = new GraphCommand($this->pdo);
@@ -81,6 +97,14 @@ final class GraphImportTest extends TestCase
     public function testImportCreatesRelationshipsWithResolvedTargets(): void
     {
         $docsDir = dirname(__DIR__, 3) . '/docs';
+        if (!is_dir($docsDir)) {
+            $docsDir = __DIR__ . '/Fixtures/psv1';
+        }
+
+        if (!is_dir($docsDir)) {
+            $this->markTestSkipped('Neither docs/ nor fixtures found');
+        }
+
         $files = $this->getAllPsv1Files($docsDir);
 
         $command = new GraphCommand($this->pdo);
@@ -106,6 +130,11 @@ final class GraphImportTest extends TestCase
     private function getAllPsv1Files(string $dir): array
     {
         $files = [];
+
+        if (!is_dir($dir)) {
+            return $files;
+        }
+
         $iterator = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS)
         );
