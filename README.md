@@ -147,7 +147,8 @@ Configuration file: `.ponymator.json`. Example:
 {
     "source": "app",
     "target": "api-docs",
-    "ignore": ["vendor", "node_modules"]
+    "ignore": ["vendor", "node_modules"],
+    "dbPath": "./db/path"
 }
 ```
 

@@ -4,6 +4,7 @@ namespace SineFine\Ponymator\Documentation\Renderer\PSV1;
 
 final class Psv1Builder
 {
+    private const MAX_VALUE_LENGTH = 120;
     /**
      * @param  string   $type
      * @param  string[] $keywords
@@ -278,6 +279,25 @@ final class Psv1Builder
 
     private function escapeValue(string $value): string
     {
-        return str_replace(["\r\n", "\r", "\n"], '\n', $value);
+        $isQuoted = str_starts_with($value, "'");
+        if ($isQuoted) {
+            $value = mb_substr($value, 1, -1);
+        }
+
+        $value = str_replace(["\r\n", "\r", "\n"], '\n', $value);
+        $value = str_replace(['<', '>'], '', $value);
+        $value = str_replace("\t", '\t', $value);
+        $value = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $value);
+
+        $limit = $isQuoted ? self::MAX_VALUE_LENGTH - 4 : self::MAX_VALUE_LENGTH - 3;
+        if (mb_strlen($value) > $limit) {
+            $value = mb_substr($value, 0, $limit) . '...';
+        }
+
+        if ($isQuoted) {
+            $value = "'" . $value . "'";
+        }
+
+        return $value;
     }
 }
