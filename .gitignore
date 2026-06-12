@@ -10,3 +10,6 @@ docs
 .phpunit.result.cache
 .phpunit.cache
 .editorconfig
+temp-doc
+temp
+*.db
