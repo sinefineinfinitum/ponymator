@@ -68,7 +68,15 @@ final class GraphCommand
     }
 
     /**
-     * @param string[] $modifiers
+     * @param  string      $fqn
+     * @param  string      $shortName
+     * @param  string      $type
+     * @param  int|null    $namespaceId
+     * @param  int|null    $fileId
+     * @param  string|null $parentClass
+     * @param  string[]    $modifiers
+     * @param  string|null $scalarType
+     * @return int
      */
     public function insertEntity(
         string $fqn,

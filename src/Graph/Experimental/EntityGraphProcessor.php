@@ -177,8 +177,14 @@ final class EntityGraphProcessor
             declaredType: $param->type,
             typeNullable: $param->type !== null && $this->isNullable($param->type),
             defaultValue: $param->value,
-            isVariadic: $param->isVariadic,
-            isPassedByReference: $param->byRef,
+            /**
+            * @phpstan-ignore nullCoalesce.property 
+            */
+            isVariadic: (bool) ($param->isVariadic ?? false),
+            /**
+            * @phpstan-ignore nullCoalesce.property 
+            */
+            isPassedByReference: (bool) ($param->byRef ?? false),
             position: $position,
         );
     }

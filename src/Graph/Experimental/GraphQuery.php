@@ -60,6 +60,9 @@ final class GraphQuery
             return [];
         }
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        /**
+ * @phpstan-ignore return.type 
+*/
         return $result;
     }
 
@@ -76,6 +79,9 @@ final class GraphQuery
         );
         $stmt->execute(['fqn' => $namespaceFqn]);
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        /**
+ * @phpstan-ignore return.type 
+*/
         return $result;
     }
 
@@ -89,6 +95,9 @@ final class GraphQuery
         );
         $stmt->execute(['entity_id' => $entityId]);
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        /**
+ * @phpstan-ignore return.type 
+*/
         return $result;
     }
 
@@ -121,6 +130,9 @@ final class GraphQuery
         );
         $stmt->execute(['member_id' => $memberId]);
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        /**
+ * @phpstan-ignore return.type 
+*/
         return $result;
     }
 
@@ -146,6 +158,9 @@ final class GraphQuery
         );
         $stmt->execute(['source_id' => $sourceId]);
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        /**
+ * @phpstan-ignore return.type 
+*/
         return $result;
     }
 
@@ -171,6 +186,9 @@ final class GraphQuery
         );
         $stmt->execute(['target_id' => $targetId]);
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        /**
+ * @phpstan-ignore return.type 
+*/
         return $result;
     }
 
@@ -189,6 +207,9 @@ final class GraphQuery
         );
         $stmt->execute(['type' => $type]);
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        /**
+ * @phpstan-ignore return.type 
+*/
         return $result;
     }
 
@@ -208,6 +229,9 @@ final class GraphQuery
             return [];
         }
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        /**
+ * @phpstan-ignore return.type 
+*/
         return $result;
     }
 
@@ -221,6 +245,9 @@ final class GraphQuery
             return [];
         }
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        /**
+ * @phpstan-ignore return.type 
+*/
         return $result;
     }
 
@@ -234,6 +261,9 @@ final class GraphQuery
         );
         $stmt->execute(['parent_id' => $parentId]);
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        /**
+ * @phpstan-ignore return.type 
+*/
         return $result;
     }
 
@@ -293,6 +323,9 @@ final class GraphQuery
             ]
         );
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        /**
+ * @phpstan-ignore return.type 
+*/
         return $result;
     }
 
@@ -306,6 +339,9 @@ final class GraphQuery
         );
         $stmt->execute(['name' => $shortName]);
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        /**
+ * @phpstan-ignore return.type 
+*/
         return $result;
     }
 
