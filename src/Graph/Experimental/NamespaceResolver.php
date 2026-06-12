@@ -4,7 +4,9 @@ namespace SineFine\Ponymator\Graph\Experimental;
 
 final class NamespaceResolver
 {
-    /** @var array<string, int> fqn => id */
+    /**
+     * @var array<string, int> fqn => id 
+     */
     private array $namespaceIds = [];
 
     public function __construct(

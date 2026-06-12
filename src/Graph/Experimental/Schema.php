@@ -6,7 +6,7 @@ use PDO;
 
 /**
  * @experimental This API is experimental and may change without notice.\
- * @since 4.0.0
+ * @since        4.0.0
  */
 final class Schema
 {

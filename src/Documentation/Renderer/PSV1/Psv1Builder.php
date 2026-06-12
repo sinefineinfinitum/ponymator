@@ -277,27 +277,32 @@ final class Psv1Builder
         return '+';
     }
 
-    private function escapeValue(string $value): string
+    private function escapeValue(?string $value): string
     {
-        $isQuoted = str_starts_with($value, "'");
-        if ($isQuoted) {
-            $value = mb_substr($value, 1, -1);
+        if ($value === null) {
+            return '';
         }
 
-        $value = str_replace(["\r\n", "\r", "\n"], '\n', $value);
-        $value = str_replace(['<', '>'], '', $value);
-        $value = str_replace("\t", '\t', $value);
-        $value = preg_replace('/[\x00-\x1F\x7F]/', '', $value);
+        $escaped = (string) $value;
+        $isQuoted = str_starts_with($escaped, "'");
+        if ($isQuoted) {
+            $escaped = mb_substr($escaped, 1, -1);
+        }
+
+        $escaped = str_replace(["\r\n", "\r", "\n"], '\n', $escaped);
+        $escaped = str_replace(['<', '>'], '', $escaped);
+        $escaped = str_replace("\t", '\t', $escaped);
+        $escaped = (string) preg_replace('/[\x00-\x1F\x7F]/', '', $escaped);
 
         $limit = $isQuoted ? self::MAX_VALUE_LENGTH - 4 : self::MAX_VALUE_LENGTH - 3;
-        if (mb_strlen($value) > $limit) {
-            $value = mb_substr($value, 0, $limit) . '...';
+        if (mb_strlen($escaped) > $limit) {
+            $escaped = mb_substr($escaped, 0, $limit) . '...';
         }
 
         if ($isQuoted) {
-            $value = "'" . $value . "'";
+            $escaped = "'" . $escaped . "'";
         }
 
-        return $value;
+        return $escaped;
     }
 }

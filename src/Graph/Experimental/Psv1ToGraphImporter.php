@@ -26,7 +26,7 @@ final class Psv1ToGraphImporter
     }
 
     /**
-     * @param list<string> $filePaths
+     * @param  list<string> $filePaths
      * @throws Throwable
      */
     public function buildFromFiles(array $filePaths, ?string $basePath = null): void

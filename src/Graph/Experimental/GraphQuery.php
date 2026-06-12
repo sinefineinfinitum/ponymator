@@ -60,7 +60,7 @@ final class GraphQuery
             return [];
         }
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        return is_array($result) ? $result : [];
+        return $result;
     }
 
     /**
@@ -76,7 +76,7 @@ final class GraphQuery
         );
         $stmt->execute(['fqn' => $namespaceFqn]);
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        return is_array($result) ? $result : [];
+        return $result;
     }
 
     /**
@@ -89,7 +89,7 @@ final class GraphQuery
         );
         $stmt->execute(['entity_id' => $entityId]);
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        return is_array($result) ? $result : [];
+        return $result;
     }
 
     public function findMemberId(int $entityId, string $name, string $memberType): ?int
@@ -97,11 +97,13 @@ final class GraphQuery
         $stmt = $this->pdo->prepare(
             'SELECT id FROM members WHERE entity_id = :entity_id AND name = :name AND member_type = :member_type'
         );
-        $stmt->execute([
+        $stmt->execute(
+            [
             'entity_id' => $entityId,
             'name' => $name,
             'member_type' => $memberType,
-        ]);
+            ]
+        );
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if ($row === false || !is_array($row) || !isset($row['id'])) {
             return null;
@@ -119,7 +121,7 @@ final class GraphQuery
         );
         $stmt->execute(['member_id' => $memberId]);
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        return is_array($result) ? $result : [];
+        return $result;
     }
 
     /**
@@ -144,7 +146,7 @@ final class GraphQuery
         );
         $stmt->execute(['source_id' => $sourceId]);
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        return is_array($result) ? $result : [];
+        return $result;
     }
 
     /**
@@ -169,7 +171,7 @@ final class GraphQuery
         );
         $stmt->execute(['target_id' => $targetId]);
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        return is_array($result) ? $result : [];
+        return $result;
     }
 
     /**
@@ -187,7 +189,7 @@ final class GraphQuery
         );
         $stmt->execute(['type' => $type]);
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        return is_array($result) ? $result : [];
+        return $result;
     }
 
     /**
@@ -206,7 +208,7 @@ final class GraphQuery
             return [];
         }
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        return is_array($result) ? $result : [];
+        return $result;
     }
 
     /**
@@ -219,7 +221,7 @@ final class GraphQuery
             return [];
         }
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        return is_array($result) ? $result : [];
+        return $result;
     }
 
     /**
@@ -232,7 +234,7 @@ final class GraphQuery
         );
         $stmt->execute(['parent_id' => $parentId]);
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        return is_array($result) ? $result : [];
+        return $result;
     }
 
     /**
@@ -259,9 +261,6 @@ final class GraphQuery
             return [];
         }
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        if (!is_array($result)) {
-            return [];
-        }
         $typed = [];
         foreach ($result as $row) {
             if (is_array($row) && isset($row['source_ns'], $row['target_ns'], $row['rel_type'], $row['count'])) {
@@ -287,12 +286,14 @@ final class GraphQuery
              WHERE n.fqn = :fqn OR n.fqn LIKE :prefix
              ORDER BY e.fqn'
         );
-        $stmt->execute([
+        $stmt->execute(
+            [
             'fqn' => $namespaceFqn,
             'prefix' => $namespaceFqn . '\\%',
-        ]);
+            ]
+        );
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        return is_array($result) ? $result : [];
+        return $result;
     }
 
     /**
@@ -305,7 +306,7 @@ final class GraphQuery
         );
         $stmt->execute(['name' => $shortName]);
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        return is_array($result) ? $result : [];
+        return $result;
     }
 
     /**

@@ -36,12 +36,14 @@ final class GraphCommand
         $stmt = $this->pdo->prepare(
             'INSERT INTO namespaces (fqn, label, parent_id, depth) VALUES (:fqn, :label, :parent_id, :depth)'
         );
-        $stmt->execute([
+        $stmt->execute(
+            [
             'fqn' => $fqn,
             'label' => $label,
             'parent_id' => $parentId,
             'depth' => $depth,
-        ]);
+            ]
+        );
         return (int) $this->pdo->lastInsertId();
     }
 
@@ -55,14 +57,19 @@ final class GraphCommand
         $stmt = $this->pdo->prepare(
             'INSERT INTO files (path, relative_path, hash) VALUES (:path, :relative_path, :hash)'
         );
-        $stmt->execute([
+        $stmt->execute(
+            [
             'path' => $path,
             'relative_path' => $relativePath,
             'hash' => $hash,
-        ]);
+            ]
+        );
         return (int) $this->pdo->lastInsertId();
     }
 
+    /**
+     * @param string[] $modifiers
+     */
     public function insertEntity(
         string $fqn,
         string $shortName,
@@ -82,7 +89,8 @@ final class GraphCommand
             'INSERT INTO entities (fqn, short_name, type, namespace_id, file_id, parent_class, is_abstract, is_final, is_readonly, scalar_type)
              VALUES (:fqn, :short_name, :type, :namespace_id, :file_id, :parent_class, :is_abstract, :is_final, :is_readonly, :scalar_type)'
         );
-        $stmt->execute([
+        $stmt->execute(
+            [
             'fqn' => $fqn,
             'short_name' => $shortName,
             'type' => $type,
@@ -93,7 +101,8 @@ final class GraphCommand
             'is_final' => in_array('final', $modifiers, true) ? 1 : 0,
             'is_readonly' => in_array('readonly', $modifiers, true) ? 1 : 0,
             'scalar_type' => $scalarType,
-        ]);
+            ]
+        );
         return (int) $this->pdo->lastInsertId();
     }
 
@@ -121,7 +130,8 @@ final class GraphCommand
             'INSERT INTO members (entity_id, name, member_type, visibility, is_static, is_abstract, is_final, is_readonly, declared_type, type_nullable, default_value, return_type, return_type_nullable)
              VALUES (:entity_id, :name, :member_type, :visibility, :is_static, :is_abstract, :is_final, :is_readonly, :declared_type, :type_nullable, :default_value, :return_type, :return_type_nullable)'
         );
-        $stmt->execute([
+        $stmt->execute(
+            [
             'entity_id' => $entityId,
             'name' => $name,
             'member_type' => $memberType,
@@ -135,7 +145,8 @@ final class GraphCommand
             'default_value' => $defaultValue,
             'return_type' => $returnType,
             'return_type_nullable' => $returnTypeNullable ? 1 : 0,
-        ]);
+            ]
+        );
         return (int) $this->pdo->lastInsertId();
     }
 
@@ -153,7 +164,8 @@ final class GraphCommand
             'INSERT INTO parameters (member_id, name, declared_type, type_nullable, default_value, is_variadic, is_passed_by_reference, position)
              VALUES (:member_id, :name, :declared_type, :type_nullable, :default_value, :is_variadic, :is_passed_by_reference, :position)'
         );
-        $stmt->execute([
+        $stmt->execute(
+            [
             'member_id' => $memberId,
             'name' => $name,
             'declared_type' => $declaredType,
@@ -162,7 +174,8 @@ final class GraphCommand
             'is_variadic' => $isVariadic ? 1 : 0,
             'is_passed_by_reference' => $isPassedByReference ? 1 : 0,
             'position' => $position,
-        ]);
+            ]
+        );
         return (int) $this->pdo->lastInsertId();
     }
 
@@ -182,18 +195,23 @@ final class GraphCommand
             'INSERT INTO relationships (source_id, target_id, target_fqn, type, source_member_id)
              VALUES (:source_id, :target_id, :target_fqn, :type, :source_member_id)'
         );
-        $stmt->execute([
+        $stmt->execute(
+            [
             'source_id' => $sourceId,
             'target_id' => $targetId,
             'target_fqn' => $targetFqn,
             'type' => $type,
             'source_member_id' => $sourceMemberId,
-        ]);
+            ]
+        );
         return (int) $this->pdo->lastInsertId();
     }
 
     /**
      * Resolve relationship target_fqn references to actual entity IDs.
+     */
+    /**
+     * @param array<string, int> $entityIdsByFqn
      */
     public function resolvePendingTargets(array $entityIdsByFqn): void
     {
@@ -256,11 +274,13 @@ final class GraphCommand
         $stmt = $this->pdo->prepare(
             'SELECT id FROM members WHERE entity_id = :entity_id AND name = :name AND member_type = :member_type'
         );
-        $stmt->execute([
+        $stmt->execute(
+            [
             'entity_id' => $entityId,
             'name' => $name,
             'member_type' => $memberType,
-        ]);
+            ]
+        );
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if ($row === false || !is_array($row) || !isset($row['id'])) {
             return null;

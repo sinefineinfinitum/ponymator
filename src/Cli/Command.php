@@ -4,6 +4,9 @@ namespace SineFine\Ponymator\Cli;
 
 final class Command
 {
+    /**
+     * @param string[] $positionalArgs
+     */
     public function __construct(
         public string $group,
         public ?string $subcommand,

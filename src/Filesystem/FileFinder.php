@@ -13,10 +13,10 @@ final class FileFinder
     /**
      * Find files recursively matching given extensions.
      *
-     * @param string   $dir            Root directory
-     * @param string[] $extensions     Allowed extensions without dot (e.g. ['php', 'psv1'])
-     * @param string[] $ignorePatterns Directory name patterns to skip
-     * @return string[] Absolute paths, sorted
+     * @param  string   $dir            Root directory
+     * @param  string[] $extensions     Allowed extensions without dot (e.g. ['php', 'psv1'])
+     * @param  string[] $ignorePatterns Directory name patterns to skip
+     * @return list<string> Absolute paths, sorted
      */
     public function find(string $dir, array $extensions, array $ignorePatterns = []): array
     {
@@ -67,6 +67,10 @@ final class FileFinder
             : $fullPath;
     }
 
+    /**
+     * @param string   $relativePath
+     * @param string[] $patterns
+     */
     private function matchesAny(string $relativePath, array $patterns): bool
     {
         foreach ($patterns as $pattern) {
@@ -82,7 +86,7 @@ final class FileFinder
     }
 
     /**
-     * @param string[] $patterns
+     * @param  string[] $patterns
      * @return string[]
      */
     public function normalizePatterns(array $patterns): array

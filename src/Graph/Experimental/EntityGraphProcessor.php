@@ -9,13 +9,15 @@ use Ponymator\Parser\Ast\ParameterNode;
 
 final class EntityGraphProcessor
 {
-    /** @var array<string, int> fqn => id */
+    /**
+     * @var array<string, int> fqn => id
+     */
     private array $entityIds = [];
 
-    /** @var array<string, array<string, int>> entityFqn => memberKey => id */
-    private array $memberIds = [];
 
-    /** @var array<string, int> shortcut for built-in type lookup */
+    /**
+     * @var list<string> shortcut for built-in type lookup
+     */
     private const BUILTIN_TYPES = [
         'string', 'int', 'float', 'bool', 'array', 'void', 'null',
         'object', 'mixed', 'never', 'true', 'false',
@@ -49,7 +51,6 @@ final class EntityGraphProcessor
             scalarType: null,
         );
         $this->entityIds[$fqn] = $entityId;
-        $this->memberIds[$fqn] = [];
 
         $this->processStructuralRelationships($entityId, $entity);
 
@@ -122,7 +123,6 @@ final class EntityGraphProcessor
             returnType: $member->returnType,
             returnTypeNullable: $member->returnType !== null && $this->isNullable($member->returnType),
         );
-        $this->memberIds[$entityFqn][$memberType . ':' . $member->name] = $memberId;
 
         if ($member->dataType !== null && $memberType === 'property') {
             $this->addTypeRelationships($entityId, $member->dataType, 'property_type', $memberId);

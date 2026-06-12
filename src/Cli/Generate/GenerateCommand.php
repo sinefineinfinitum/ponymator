@@ -45,8 +45,8 @@ final class GenerateCommand
     }
 
     /**
-     * @param Engine $generator
-     * @param string[]               $sourceFiles
+     * @param Engine   $generator
+     * @param string[] $sourceFiles
      */
     private function runGeneration(Engine $generator, array $sourceFiles, Command $cmd): void
     {
@@ -58,8 +58,8 @@ final class GenerateCommand
     }
 
     /**
-     * @param Engine $generator
-     * @param string[]               $sourceFiles
+     * @param Engine   $generator
+     * @param string[] $sourceFiles
      */
     private function runFull(Engine $generator, array $sourceFiles): void
     {
@@ -81,8 +81,8 @@ final class GenerateCommand
     }
 
     /**
-     * @param Engine $generator
-     * @param string[]               $sourceFiles
+     * @param Engine   $generator
+     * @param string[] $sourceFiles
      */
     private function runDiff(Engine $generator, array $sourceFiles): void
     {

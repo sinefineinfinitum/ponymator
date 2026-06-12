@@ -103,8 +103,7 @@ final class ShowEntityCommand
     }
 
     /**
-     * @param array $external
-     * @return void
+     * @param string[] $external
      */
     private function printExternal(array $external): void
     {
@@ -115,9 +114,8 @@ final class ShowEntityCommand
     }
 
     /**
-     * @param int $inCount
-     * @param array $callIncoming
-     * @return void
+     * @param int                              $inCount
+     * @param array<int, array<string, mixed>> $callIncoming
      */
     private function printUsedBy(int $inCount, array $callIncoming): void
     {
@@ -142,8 +140,7 @@ final class ShowEntityCommand
     }
 
     /**
-     * @param array $structuralIncoming
-     * @return void
+     * @param array<int, array<string, mixed>> $structuralIncoming
      */
     private function printStructuralIncoming(array $structuralIncoming): void
     {
@@ -176,8 +173,7 @@ final class ShowEntityCommand
     }
 
     /**
-     * @param array $outgoingStructural
-     * @return void
+     * @param array<int, array<string, mixed>> $outgoingStructural
      */
     private function printOutgoingStructural(array $outgoingStructural): void
     {
@@ -210,9 +206,8 @@ final class ShowEntityCommand
     }
 
     /**
-     * @param array $outgoingCalls
-     * @param int $outCount
-     * @return void
+     * @param array<int, array<string, mixed>> $outgoingCalls
+     * @param int                              $outCount
      */
     private function printMember(array $outgoingCalls, int $outCount): void
     {
@@ -253,7 +248,6 @@ final class ShowEntityCommand
                 'case' => 'Cases',
                 'constant' => 'Constants',
                 'method' => 'Methods',
-                default => ucfirst($sectionType) . 's',
             };
             $count = count($memberSections[$sectionType]);
             echo "\n" . $sectionLabel . " (" . $count . "):\n";
@@ -298,10 +292,9 @@ final class ShowEntityCommand
     }
 
     /**
-     * @param array $entity
-     * @param array $modifiers
-     * @param mixed $filePath
-     * @return void
+     * @param array<string, mixed> $entity
+     * @param string[]             $modifiers
+     * @param string|null          $filePath
      */
     private function printEntityType(array $entity, array $modifiers, mixed $filePath): void
     {
