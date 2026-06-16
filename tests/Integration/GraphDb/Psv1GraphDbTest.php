@@ -186,31 +186,31 @@ final class Psv1GraphDbTest extends TestCase
         $this->assertIsArray($globalRels, 'Global call relationships should be an array');
     }
 
-    public function testReturnTypeRelationships(): void
+    public function testReturnTypeRecords(): void
     {
         if (!self::$query) {
             $this->markTestSkipped('docs/ directory not found, database not initialized');
         }
-        $returnRels = self::$query->findRelationshipsByType('return_type');
-        $this->assertNotEmpty($returnRels, 'No return type relationships found');
+        $count = self::$query->countTypes();
+        $this->assertGreaterThan(0, $count, 'No type records found in types table');
     }
 
-    public function testParamTypeRelationships(): void
+    public function testParamTypeRecords(): void
     {
         if (!self::$query) {
             $this->markTestSkipped('docs/ directory not found, database not initialized');
         }
-        $paramRels = self::$query->findRelationshipsByType('param_type');
-        $this->assertNotEmpty($paramRels, 'No param type relationships found');
+        $types = self::$query->findTypesByOwner('param', 1);
+        $this->assertNotEmpty($types, 'No param type records found');
     }
 
-    public function testPropertyTypeRelationships(): void
+    public function testPropertyTypeRecords(): void
     {
         if (!self::$query) {
             $this->markTestSkipped('docs/ directory not found, database not initialized');
         }
-        $propRels = self::$query->findRelationshipsByType('property_type');
-        $this->assertNotEmpty($propRels, 'No property type relationships found');
+        $types = self::$query->findTypesByOwner('property', 1);
+        $this->assertNotEmpty($types, 'No property type records found');
     }
 
     public function testSampleEntityData(): void

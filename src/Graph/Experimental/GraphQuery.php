@@ -176,6 +176,23 @@ final class GraphQuery
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function findTypesByOwner(string $ownerType, int $ownerId): array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT t.*, e.fqn AS entity_fqn
+             FROM types t
+             LEFT JOIN entities e ON e.id = t.entity_id
+             WHERE t.owner_type = :owner_type AND t.owner_id = :owner_id
+             ORDER BY t.position'
+        );
+        $stmt->execute(['owner_type' => $ownerType, 'owner_id' => $ownerId]);
+        /** @phpstan-ignore return.type */
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function findRelationshipId(int $sourceId, ?int $targetId, ?string $targetFqn, string $type, ?int $sourceMemberId, ?string $targetMemberName = null): ?int
     {
         $sql = 'SELECT id FROM relationships WHERE source_id = :source_id AND type = :type';
@@ -311,6 +328,16 @@ final class GraphQuery
     public function countMembers(): int
     {
         $stmt = $this->pdo->query('SELECT COUNT(*) FROM members');
+        if ($stmt === false) {
+            return 0;
+        }
+        $value = $stmt->fetchColumn();
+        return is_numeric($value) ? (int) $value : 0;
+    }
+
+    public function countTypes(): int
+    {
+        $stmt = $this->pdo->query('SELECT COUNT(*) FROM types');
         if ($stmt === false) {
             return 0;
         }

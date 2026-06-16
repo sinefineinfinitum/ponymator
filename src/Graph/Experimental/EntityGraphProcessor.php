@@ -16,9 +16,6 @@ final class EntityGraphProcessor
     public const REL_EXTENDS = 'extends';
     public const REL_IMPLEMENTS = 'implements';
     public const REL_USES_TRAIT = 'uses_trait';
-    public const REL_PROPERTY_TYPE = 'property_type';
-    public const REL_RETURN_TYPE = 'return_type';
-    public const REL_PARAM_TYPE = 'param_type';
     public const REL_CREATES = 'creates';
 
     private PhpTypeParser $typeParser;
@@ -101,18 +98,21 @@ final class EntityGraphProcessor
             isFinal: in_array('final', $member->attributes, true),
             isReadonly: in_array('readonly', $member->attributes, true),
             declaredType: $member->dataType,
-            typeNullable: $member->dataType !== null && $this->typeParser->isNullable($member->dataType),
             defaultValue: $member->value,
             returnType: $member->returnType,
-            returnTypeNullable: $member->returnType !== null && $this->typeParser->isNullable($member->returnType),
         );
 
-        $this->processMemberTypeRelationships($entityId, $memberId, $member, $memberType);
+        if ($member->dataType !== null && $memberType === 'property') {
+            $this->insertTypes('property', $memberId, $member->dataType);
+        }
+        if ($member->returnType !== null && ($memberType === 'method' || $memberType === 'function')) {
+            $this->insertTypes('return', $memberId, $member->returnType);
+        }
 
         foreach ($member->parameters as $position => $param) {
-            $this->processParameter($memberId, $param, $position);
+            $paramId = $this->processParameter($memberId, $param, $position);
             if ($param->type !== null) {
-                $this->addTypeRelationships($entityId, $param->type, self::REL_PARAM_TYPE, $memberId);
+                $this->insertTypes('param', $paramId, $param->type);
             }
         }
 
@@ -125,17 +125,6 @@ final class EntityGraphProcessor
         }
     }
 
-    private function processMemberTypeRelationships(int $entityId, int $memberId, MemberNode $member, string $memberType): void
-    {
-        if ($member->dataType !== null && $memberType === 'property') {
-            $this->addTypeRelationships($entityId, $member->dataType, self::REL_PROPERTY_TYPE, $memberId);
-        }
-
-        if ($member->returnType !== null && ($memberType === 'method' || $memberType === 'function')) {
-            $this->addTypeRelationships($entityId, $member->returnType, self::REL_RETURN_TYPE, $memberId);
-        }
-    }
-
     private function processCall(int $entityId, int $memberId, CallNode $call): void
     {
         $relType = $this->callToRelType($call);
@@ -144,13 +133,18 @@ final class EntityGraphProcessor
         $this->addRelationship($entityId, $memberId, $targetFqn, $relType);
     }
 
-    private function processParameter(int $memberId, ParameterNode $param, int $position): void
+    private function processParameter(int $memberId, ParameterNode $param, int $position): int
     {
-        $this->command->insertParameter(
+        $type = $param->type;
+
+        if ($type !== null && str_starts_with($type, '?')) {
+            $type = substr($type, 1);
+        }
+
+        return $this->command->insertParameter(
             memberId: $memberId,
             name: $param->name,
-            declaredType: $param->type,
-            typeNullable: $param->type !== null && $this->typeParser->isNullable($param->type),
+            declaredType: $type,
             defaultValue: $param->value,
             /**
              * @phpstan-ignore nullCoalesce.property
@@ -195,14 +189,6 @@ final class EntityGraphProcessor
         return $type . $suffix;
     }
 
-    private function addTypeRelationships(int $entityId, string $type, string $relType, ?int $memberId): void
-    {
-        $types = $this->typeParser->extractClassTypes($type);
-        foreach ($types as $classType) {
-            $this->addRelationship($entityId, $memberId, $classType, $relType);
-        }
-    }
-
     private function addRelationship(int $sourceId, ?int $memberId, ?string $targetFqn, string $type): void
     {
         $this->command->insertRelationship(
@@ -212,5 +198,29 @@ final class EntityGraphProcessor
             type: $type,
             sourceMemberId: $memberId,
         );
+    }
+
+    private function insertTypes(string $ownerType, int $ownerId, string $type): void
+    {
+        $components = $this->typeParser->parseAtomicTypes($type);
+        foreach ($components as $component) {
+            $name = $component['name'];
+            $entityId = null;
+
+            if ($name !== '' && !in_array(strtolower($name), PhpTypeParser::BUILTIN_TYPES, true)) {
+                $normalized = ltrim($name, '\\');
+                $entityId = $this->entityIds[$normalized] ?? null;
+            }
+
+            $this->command->insertType(
+                ownerType: $ownerType,
+                ownerId: $ownerId,
+                name: $name,
+                entityId: $entityId,
+                isUnion: $component['is_union'],
+                isIntersection: $component['is_intersection'],
+                position: $component['position'],
+            );
+        }
     }
 }

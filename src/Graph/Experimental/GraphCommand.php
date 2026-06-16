@@ -127,10 +127,8 @@ final class GraphCommand
         bool $isFinal,
         bool $isReadonly,
         ?string $declaredType,
-        bool $typeNullable,
         ?string $defaultValue,
         ?string $returnType,
-        bool $returnTypeNullable
     ): int {
         $existing = $this->query->findMemberId($entityId, $name, $memberType);
         if ($existing !== null) {
@@ -138,8 +136,8 @@ final class GraphCommand
         }
 
         $stmt = $this->pdo->prepare(
-            'INSERT INTO members (entity_id, name, member_type, visibility, is_static, is_abstract, is_final, is_readonly, declared_type, type_nullable, default_value, return_type, return_type_nullable)
-             VALUES (:entity_id, :name, :member_type, :visibility, :is_static, :is_abstract, :is_final, :is_readonly, :declared_type, :type_nullable, :default_value, :return_type, :return_type_nullable)'
+            'INSERT INTO members (entity_id, name, member_type, visibility, is_static, is_abstract, is_final, is_readonly, declared_type, default_value, return_type)
+             VALUES (:entity_id, :name, :member_type, :visibility, :is_static, :is_abstract, :is_final, :is_readonly, :declared_type, :default_value, :return_type)'
         );
         $stmt->execute(
             [
@@ -152,10 +150,8 @@ final class GraphCommand
             'is_final' => $isFinal ? 1 : 0,
             'is_readonly' => $isReadonly ? 1 : 0,
             'declared_type' => $declaredType,
-            'type_nullable' => $typeNullable ? 1 : 0,
             'default_value' => $defaultValue,
             'return_type' => $returnType,
-            'return_type_nullable' => $returnTypeNullable ? 1 : 0,
             ]
         );
         return (int) $this->pdo->lastInsertId();
@@ -165,25 +161,50 @@ final class GraphCommand
         int $memberId,
         string $name,
         ?string $declaredType,
-        bool $typeNullable,
         ?string $defaultValue,
         bool $isVariadic,
         bool $isPassedByReference,
         int $position
     ): int {
         $stmt = $this->pdo->prepare(
-            'INSERT INTO parameters (member_id, name, declared_type, type_nullable, default_value, is_variadic, is_passed_by_reference, position)
-             VALUES (:member_id, :name, :declared_type, :type_nullable, :default_value, :is_variadic, :is_passed_by_reference, :position)'
+            'INSERT INTO parameters (member_id, name, declared_type, default_value, is_variadic, is_passed_by_reference, position)
+             VALUES (:member_id, :name, :declared_type, :default_value, :is_variadic, :is_passed_by_reference, :position)'
         );
         $stmt->execute(
             [
             'member_id' => $memberId,
             'name' => $name,
             'declared_type' => $declaredType,
-            'type_nullable' => $typeNullable ? 1 : 0,
             'default_value' => $defaultValue,
             'is_variadic' => $isVariadic ? 1 : 0,
             'is_passed_by_reference' => $isPassedByReference ? 1 : 0,
+            'position' => $position,
+            ]
+        );
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    public function insertType(
+        string $ownerType,
+        int $ownerId,
+        string $name,
+        ?int $entityId,
+        bool $isUnion,
+        bool $isIntersection,
+        int $position
+    ): int {
+        $stmt = $this->pdo->prepare(
+            'INSERT INTO types (owner_type, owner_id, name, entity_id, is_union, is_intersection, position)
+             VALUES (:owner_type, :owner_id, :name, :entity_id, :is_union, :is_intersection, :position)'
+        );
+        $stmt->execute(
+            [
+            'owner_type' => $ownerType,
+            'owner_id' => $ownerId,
+            'name' => $name,
+            'entity_id' => $entityId,
+            'is_union' => $isUnion ? 1 : 0,
+            'is_intersection' => $isIntersection ? 1 : 0,
             'position' => $position,
             ]
         );

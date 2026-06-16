@@ -87,7 +87,6 @@ final class ShowEntityCommand
         }
 
         $external = array_values(array_unique($external));
-        $inCount = count($callIncoming);
 
         $this->printEntityType($entity, $modifiers, $filePath);
 
@@ -97,7 +96,7 @@ final class ShowEntityCommand
 
         $this->printMembers($members, $outgoingCalls, $query);
 
-        $this->printUsedBy($inCount, $callIncoming);
+        $this->printUsedBy($callIncoming);
 
         $this->printExternal($external);
     }
@@ -114,11 +113,11 @@ final class ShowEntityCommand
     }
 
     /**
-     * @param int                              $inCount
      * @param array<int, array<string, mixed>> $callIncoming
      */
-    private function printUsedBy(int $inCount, array $callIncoming): void
+    private function printUsedBy(array $callIncoming): void
     {
+        $inCount = count($callIncoming);
         echo "\n  Used by (" . $inCount . "):\n";
         foreach ($callIncoming as $rel) {
             $type = $rel['type'];
@@ -273,12 +272,13 @@ final class ShowEntityCommand
                     foreach ($params as $param) {
                         $pStr = '';
                         if ($param['declared_type'] !== null) {
-                            $pStr .= ($param['type_nullable'] ? '?' : '') . $param['declared_type'] . ' ';
+                            $typeStr = $param['declared_type'];
+                            $pStr .= $typeStr . ' ';
                         }
-                        if ($param['is_passed_by_reference']) {
+                        if ((int) $param['is_passed_by_reference'] === 1) {
                             $pStr .= '&';
                         }
-                        if ($param['is_variadic']) {
+                        if ((int) $param['is_variadic'] === 1) {
                             $pStr .= '...';
                         }
                         $pStr .= '$' . $param['name'];
@@ -289,13 +289,13 @@ final class ShowEntityCommand
                     }
                     $signature = $prefix . 'function ' . $name . '(' . implode(', ', $paramStrings) . ')';
                     if ($member['return_type'] !== null) {
-                        $signature .= ': ' . ($member['return_type_nullable'] ? '?' : '') . $member['return_type'];
+                        $signature .= ': ' . $member['return_type'];
                     }
                     echo "    $signature\n";
                 } elseif ($sectionType === 'property') {
                     $typeStr = '';
                     if ($member['declared_type'] !== null) {
-                        $typeStr = ($member['type_nullable'] ? '?' : '') . $member['declared_type'] . ' ';
+                        $typeStr = $member['declared_type'] . ' ';
                     }
                     echo "    $prefix$typeStr\$$name\n";
                 } elseif ($sectionType === 'constant') {

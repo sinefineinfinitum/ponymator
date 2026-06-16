@@ -11,7 +11,7 @@ final class PhpTypeParser
     /**
      * @var list<string> shortcut for built-in type lookup
      */
-    private const BUILTIN_TYPES = [
+    public const BUILTIN_TYPES = [
         'string', 'int', 'float', 'bool', 'array', 'void', 'null',
         'object', 'mixed', 'never', 'true', 'false',
         'self', 'parent', 'static', 'iterable', 'callable',
@@ -44,5 +44,47 @@ final class PhpTypeParser
     public function isNullable(string $type): bool
     {
         return str_starts_with($type, '?') || stripos($type, '|null') !== false || stripos($type, 'null|') !== false;
+    }
+
+    /**
+     * Parse a type string into atomic types.
+     *
+     * Given "string|int|null" returns:
+     *   [ ['name'=>'string', 'is_union'=>true,  'is_intersection'=>false, 'position'=>0],
+     *     ['name'=>'int',    'is_union'=>true,  'is_intersection'=>false, 'position'=>1],
+     *     ['name'=>'null',   'is_union'=>true,  'is_intersection'=>false, 'position'=>2] ]
+     *
+     * Given "App\Entity\User" returns:
+     *   [ ['name'=>'App\Entity\User', 'is_union'=>false, 'is_intersection'=>false, 'position'=>0] ]
+     *
+     * @return list<array{name: string, is_union: bool, is_intersection: bool, position: int}>
+     */
+    public function parseAtomicTypes(string $type): array
+    {
+        if (str_contains($type, '|')) {
+            $parts = explode('|', $type);
+            $isUnion = true;
+            $isIntersection = false;
+        } elseif (str_contains($type, '&')) {
+            $parts = explode('&', $type);
+            $isUnion = false;
+            $isIntersection = true;
+        } else {
+            $parts = [$type];
+            $isUnion = false;
+            $isIntersection = false;
+        }
+
+        $result = [];
+        foreach ($parts as $position => $part) {
+            $result[] = [
+                'name' => trim($part),
+                'is_union' => $isUnion,
+                'is_intersection' => $isIntersection,
+                'position' => $position,
+            ];
+        }
+
+        return $result;
     }
 }

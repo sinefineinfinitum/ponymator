@@ -135,13 +135,13 @@ final class Psv1BuilderTest extends TestCase
         $property = [
             'name' => 'mixed',
             'visibility' => 'public',
-            'type' => null,
+            'type' => 'mixed',
             'defaultValue' => null,
             'isStatic' => false,
             'isReadonly' => false,
         ];
         $result = $this->builder->property($property);
-        $this->assertSame('$+mixed' . PHP_EOL, $result);
+        $this->assertSame('$+mixed:mixed' . PHP_EOL, $result);
     }
 
     public function testPropertyUnionType(): void
@@ -263,12 +263,12 @@ final class Psv1BuilderTest extends TestCase
     {
         $parameter = [
             'name' => 'mixed',
-            'type' => null,
+            'type' => 'mixed',
             'defaultValue' => null,
             'isPassedByReference' => false,
         ];
         $result = $this->builder->parameter($parameter);
-        $this->assertSame('    $mixed' . PHP_EOL, $result);
+        $this->assertSame('    $mixed:mixed' . PHP_EOL, $result);
     }
 
     public function testParameterUnionType(): void

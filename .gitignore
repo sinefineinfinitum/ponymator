@@ -11,5 +11,6 @@ docs
 .phpunit.cache
 .editorconfig
 temp-doc
+temp-md
 temp
 *.db

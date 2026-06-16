@@ -16,6 +16,7 @@ final class Schema
         'entities',
         'members',
         'parameters',
+        'types',
         'relationships',
     ];
 
@@ -91,10 +92,8 @@ final class Schema
                 is_final            INTEGER NOT NULL DEFAULT 0,
                 is_readonly         INTEGER NOT NULL DEFAULT 0,
                 declared_type       TEXT,
-                type_nullable       INTEGER NOT NULL DEFAULT 0,
                 default_value       TEXT,
                 return_type         TEXT,
-                return_type_nullable INTEGER NOT NULL DEFAULT 0,
                 UNIQUE(entity_id, name, member_type)
             )
             SQL,
@@ -105,13 +104,28 @@ final class Schema
                 member_id            INTEGER NOT NULL REFERENCES members(id) ON DELETE CASCADE,
                 name                 TEXT    NOT NULL,
                 declared_type        TEXT,
-                type_nullable        INTEGER NOT NULL DEFAULT 0,
                 default_value        TEXT,
                 is_variadic          INTEGER NOT NULL DEFAULT 0,
                 is_passed_by_reference INTEGER NOT NULL DEFAULT 0,
                 position             INTEGER NOT NULL
             )
             SQL,
+
+            <<<'SQL'
+            CREATE TABLE IF NOT EXISTS types (
+                id                INTEGER PRIMARY KEY AUTOINCREMENT,
+                owner_type        TEXT    NOT NULL CHECK(owner_type IN ('param','return','property')),
+                owner_id          INTEGER NOT NULL,
+                name              TEXT    NOT NULL,
+                entity_id         INTEGER REFERENCES entities(id) ON DELETE SET NULL,
+                is_union          INTEGER NOT NULL DEFAULT 0,
+                is_intersection   INTEGER NOT NULL DEFAULT 0,
+                position          INTEGER NOT NULL DEFAULT 0
+            )
+            SQL,
+
+            'CREATE INDEX IF NOT EXISTS idx_types_owner ON types(owner_type, owner_id)',
+            'CREATE INDEX IF NOT EXISTS idx_types_entity ON types(entity_id)',
 
             <<<'SQL'
             CREATE TABLE IF NOT EXISTS relationships (
@@ -126,7 +140,6 @@ final class Schema
                     'call_static_weak','call_static_strong',
                     'call_dynamic_weak','call_dynamic_strong',
                     'call_global_weak','call_global_strong',
-                    'property_type','return_type','param_type',
                     'dependency'
                 )),
                 source_member_id INTEGER          REFERENCES members(id) ON DELETE SET NULL

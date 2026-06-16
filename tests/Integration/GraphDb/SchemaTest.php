@@ -28,6 +28,7 @@ final class SchemaTest extends TestCase
         $this->assertContains('members', $tables);
         $this->assertContains('parameters', $tables);
         $this->assertContains('relationships', $tables);
+        $this->assertContains('types', $tables);
     }
 
     public function testDropRemovesAllTables(): void
@@ -43,6 +44,7 @@ final class SchemaTest extends TestCase
         $this->assertNotContains('members', $tables);
         $this->assertNotContains('parameters', $tables);
         $this->assertNotContains('relationships', $tables);
+        $this->assertNotContains('types', $tables);
     }
 
     public function testCreateIsIdempotent(): void
@@ -51,7 +53,7 @@ final class SchemaTest extends TestCase
         Schema::create($this->pdo);
 
         $tables = $this->getTableNames();
-        $this->assertCount(6, $tables);
+        $this->assertCount(7, $tables);
     }
 
     public function testRelationshipTypeConstraint(): void
@@ -67,7 +69,6 @@ final class SchemaTest extends TestCase
             'call_static_weak', 'call_static_strong',
             'call_dynamic_weak', 'call_dynamic_strong',
             'call_global_weak', 'call_global_strong',
-            'property_type', 'return_type', 'param_type',
             'dependency',
         ];
 
