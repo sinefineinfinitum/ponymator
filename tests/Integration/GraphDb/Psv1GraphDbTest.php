@@ -200,7 +200,7 @@ final class Psv1GraphDbTest extends TestCase
         if (!self::$query) {
             $this->markTestSkipped('docs/ directory not found, database not initialized');
         }
-        $types = self::$query->findTypesByOwner('param', 1);
+        $types = self::$query->findTypesByOwner('param');
         $this->assertNotEmpty($types, 'No param type records found');
     }
 
@@ -209,7 +209,7 @@ final class Psv1GraphDbTest extends TestCase
         if (!self::$query) {
             $this->markTestSkipped('docs/ directory not found, database not initialized');
         }
-        $types = self::$query->findTypesByOwner('property', 1);
+        $types = self::$query->findTypesByOwner('property');
         $this->assertNotEmpty($types, 'No property type records found');
     }
 

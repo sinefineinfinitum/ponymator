@@ -57,10 +57,18 @@ final class PhpTypeParser
      * Given "App\Entity\User" returns:
      *   [ ['name'=>'App\Entity\User', 'is_union'=>false, 'is_intersection'=>false, 'position'=>0] ]
      *
+     * Given "?string" (PHP 8.0 nullable shorthand) returns:
+     *   [ ['name'=>'string', 'is_union'=>true, 'is_intersection'=>false, 'position'=>0],
+     *     ['name'=>'null',   'is_union'=>true, 'is_intersection'=>false, 'position'=>1] ]
+     *
      * @return list<array{name: string, is_union: bool, is_intersection: bool, position: int}>
      */
     public function parseAtomicTypes(string $type): array
     {
+        if (str_starts_with($type, '?')) {
+            $type = substr($type, 1) . '|null';
+        }
+
         if (str_contains($type, '|')) {
             $parts = explode('|', $type);
             $isUnion = true;

@@ -58,6 +58,35 @@ final class PhpTypeParserTest extends TestCase
         $this->assertFalse($result[0]['is_intersection']);
     }
 
+    public function testParseAtomicTypesNullableShorthand(): void
+    {
+        $result = $this->parser->parseAtomicTypes('?string');
+        $this->assertCount(2, $result);
+        $this->assertSame('string', $result[0]['name']);
+        $this->assertSame('null', $result[1]['name']);
+        $this->assertTrue($result[0]['is_union']);
+        $this->assertTrue($result[1]['is_union']);
+        $this->assertSame(0, $result[0]['position']);
+        $this->assertSame(1, $result[1]['position']);
+    }
+
+    public function testParseAtomicTypesNullableClass(): void
+    {
+        $result = $this->parser->parseAtomicTypes('?App\Entity\User');
+        $this->assertCount(2, $result);
+        $this->assertSame('App\Entity\User', $result[0]['name']);
+        $this->assertSame('null', $result[1]['name']);
+    }
+
+    public function testParseAtomicTypesNullableAlreadyUnion(): void
+    {
+        $result = $this->parser->parseAtomicTypes('?string|int');
+        $this->assertCount(3, $result);
+        $this->assertSame('string', $result[0]['name']);
+        $this->assertSame('int', $result[1]['name']);
+        $this->assertSame('null', $result[2]['name']);
+    }
+
     public function testExtractClassTypes(): void
     {
         $types = $this->parser->extractClassTypes('string|int|App\Entity\User');

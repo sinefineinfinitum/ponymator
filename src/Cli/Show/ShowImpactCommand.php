@@ -3,20 +3,15 @@
 namespace SineFine\Ponymator\Cli\Show;
 
 use SineFine\Ponymator\Cli\Command;
-use SineFine\Ponymator\Cli\Error\ExitCode;
 use SineFine\Ponymator\Graph\Experimental\GraphQuery;
 
 final class ShowImpactCommand
 {
+    public const DEFAULT_DEPTH = 3;
     public function execute(Command $cmd, GraphQuery $query): void
     {
-        if (count($cmd->positionalArgs) < 1) {
-            fwrite(STDERR, "Error: show impact requires a entity name\n");
-            exit(ExitCode::WRONG_USAGE);
-        }
-
-        $name = $cmd->positionalArgs[0];
-        $maxDepth = $cmd->depth ?? 3;
+        $name = $cmd->namedArgs['entity'];
+        $maxDepth = $cmd->depth ?? self::DEFAULT_DEPTH;
 
         $resolver = new EntityResolver();
         $entityId = $resolver->resolve($name, $query);

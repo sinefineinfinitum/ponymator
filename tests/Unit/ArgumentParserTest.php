@@ -105,6 +105,7 @@ final class ArgumentParserTest extends TestCase
         $this->assertSame('show', $cmd->group);
         $this->assertSame('entity', $cmd->subcommand);
         $this->assertSame(['ArgumentParser'], $cmd->positionalArgs);
+        $this->assertSame(['entity' => 'ArgumentParser'], $cmd->namedArgs);
         $this->assertSame('graph.db', $cmd->dbPath);
     }
 
@@ -114,6 +115,7 @@ final class ArgumentParserTest extends TestCase
         $this->assertSame('show', $cmd->group);
         $this->assertSame('impact', $cmd->subcommand);
         $this->assertSame(['ArgumentParser'], $cmd->positionalArgs);
+        $this->assertSame(['entity' => 'ArgumentParser'], $cmd->namedArgs);
         $this->assertSame(2, $cmd->depth);
     }
 
@@ -123,6 +125,7 @@ final class ArgumentParserTest extends TestCase
         $this->assertSame('show', $cmd->group);
         $this->assertSame('path', $cmd->subcommand);
         $this->assertSame(['ClassA', 'ClassB'], $cmd->positionalArgs);
+        $this->assertSame(['from' => 'ClassA', 'to' => 'ClassB'], $cmd->namedArgs);
         $this->assertSame(5, $cmd->depth);
     }
 

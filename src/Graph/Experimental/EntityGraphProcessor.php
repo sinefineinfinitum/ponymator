@@ -88,6 +88,9 @@ final class EntityGraphProcessor
     {
         $memberType = $this->mapMemberType($member->type);
 
+        $declaredType = self::stripNullablePrefix($member->dataType);
+        $returnType = $member->returnType;
+
         $memberId = $this->command->insertMember(
             entityId: $entityId,
             name: $member->name,
@@ -97,23 +100,20 @@ final class EntityGraphProcessor
             isAbstract: in_array('abstract', $member->attributes, true),
             isFinal: in_array('final', $member->attributes, true),
             isReadonly: in_array('readonly', $member->attributes, true),
-            declaredType: $member->dataType,
+            declaredType: $declaredType,
             defaultValue: $member->value,
-            returnType: $member->returnType,
+            returnType: $returnType,
         );
 
-        if ($member->dataType !== null && $memberType === 'property') {
-            $this->insertTypes('property', $memberId, $member->dataType);
+        if ($declaredType !== null && $memberType === 'property') {
+            $this->insertTypes('property', $memberId, $declaredType);
         }
-        if ($member->returnType !== null && ($memberType === 'method' || $memberType === 'function')) {
-            $this->insertTypes('return', $memberId, $member->returnType);
+        if ($returnType !== null && ($memberType === 'method' || $memberType === 'function')) {
+            $this->insertTypes('return', $memberId, $returnType);
         }
 
         foreach ($member->parameters as $position => $param) {
-            $paramId = $this->processParameter($memberId, $param, $position);
-            if ($param->type !== null) {
-                $this->insertTypes('param', $paramId, $param->type);
-            }
+            $this->processParameter($memberId, $param, $position);
         }
 
         foreach ($member->creates as $createdClass) {
@@ -133,18 +133,14 @@ final class EntityGraphProcessor
         $this->addRelationship($entityId, $memberId, $targetFqn, $relType);
     }
 
-    private function processParameter(int $memberId, ParameterNode $param, int $position): int
+    private function processParameter(int $memberId, ParameterNode $param, int $position): void
     {
-        $type = $param->type;
+        $declaredType = self::stripNullablePrefix($param->type);
 
-        if ($type !== null && str_starts_with($type, '?')) {
-            $type = substr($type, 1);
-        }
-
-        return $this->command->insertParameter(
+        $paramId = $this->command->insertParameter(
             memberId: $memberId,
             name: $param->name,
-            declaredType: $type,
+            declaredType: $declaredType,
             defaultValue: $param->value,
             /**
              * @phpstan-ignore nullCoalesce.property
@@ -156,6 +152,10 @@ final class EntityGraphProcessor
             isPassedByReference: (bool) ($param->byRef ?? false),
             position: $position,
         );
+
+        if ($declaredType !== null) {
+            $this->insertTypes('param', $paramId, $declaredType);
+        }
     }
 
     private function mapEntityType(string $psv1Type): string
@@ -198,6 +198,15 @@ final class EntityGraphProcessor
             type: $type,
             sourceMemberId: $memberId,
         );
+    }
+
+    private static function stripNullablePrefix(?string $type): ?string
+    {
+        if ($type !== null && str_starts_with($type, '?')) {
+            return substr($type, 1);
+        }
+
+        return $type;
     }
 
     private function insertTypes(string $ownerType, int $ownerId, string $type): void

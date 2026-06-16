@@ -49,7 +49,7 @@ final class Psv1ToGraphImporter
             if ($currentFilePath !== null) {
                 $message .= " on file " . $currentFilePath;
             }
-            throw new RuntimeException($message);
+            throw new RuntimeException($message, 0, $e);
         }
     }
 

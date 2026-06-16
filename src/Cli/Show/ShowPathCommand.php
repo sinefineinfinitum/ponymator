@@ -3,20 +3,14 @@
 namespace SineFine\Ponymator\Cli\Show;
 
 use SineFine\Ponymator\Cli\Command;
-use SineFine\Ponymator\Cli\Error\ExitCode;
 use SineFine\Ponymator\Graph\Experimental\GraphQuery;
 
 final class ShowPathCommand
 {
     public function execute(Command $cmd, GraphQuery $query): void
     {
-        if (count($cmd->positionalArgs) < 2) {
-            fwrite(STDERR, "Error: show path requires two arguments: <from> <to>\n");
-            exit(ExitCode::WRONG_USAGE);
-        }
-
-        $fromName = $cmd->positionalArgs[0];
-        $toName = $cmd->positionalArgs[1];
+        $fromName = $cmd->namedArgs['from'];
+        $toName = $cmd->namedArgs['to'];
         $maxDepth = $cmd->depth ?? PHP_INT_MAX;
 
         $resolver = new EntityResolver();
@@ -33,7 +27,7 @@ final class ShowPathCommand
             return;
         }
 
-        $path = $this->bfsBidirectional($sourceId, $targetId, $maxDepth, $query);
+        $path = $this->bfs($sourceId, $targetId, $maxDepth, $query);
 
         if ($path === null) {
             echo "No path found from " . $sourceFqn . " to " . $targetFqn . ".\n";
@@ -65,7 +59,7 @@ final class ShowPathCommand
     /**
      * @return list<array{fqn: string, rel_type: string, direction: string}>|null
      */
-    private function bfsBidirectional(int $sourceId, int $targetId, int $maxDepth, GraphQuery $query): ?array
+    private function bfs(int $sourceId, int $targetId, int $maxDepth, GraphQuery $query): ?array
     {
         $visited = [$sourceId => ['parent' => null, 'rel_type' => '', 'direction' => '']];
         $queue = [[$sourceId, 0]];
@@ -134,7 +128,7 @@ final class ShowPathCommand
 
         while ($current !== null) {
             $info = $visited[$current];
-            $entity = $query->findEntity($this->getFqnById($current, $query));
+            $entity = $query->findEntityById($current);
             $fqn = $entity !== null ? (string) $entity['fqn'] : (string) $current;
 
             $hop = [
@@ -148,16 +142,5 @@ final class ShowPathCommand
         }
 
         return $path;
-    }
-
-    private function getFqnById(int $id, GraphQuery $query): string
-    {
-        $entities = $query->findAllEntities();
-        foreach ($entities as $entity) {
-            if ((int) $entity['id'] === $id) {
-                return (string) $entity['fqn'];
-            }
-        }
-        return (string) $id;
     }
 }

@@ -24,6 +24,7 @@ final class CommandTest extends TestCase
         $this->assertSame('show', $cmd->group);
         $this->assertSame('symbol', $cmd->subcommand);
         $this->assertSame(['ArgumentParser'], $cmd->positionalArgs);
+        $this->assertSame([], $cmd->namedArgs);
         $this->assertNull($cmd->configPath);
         $this->assertSame('md', $cmd->output);
         $this->assertSame('graph.db', $cmd->dbPath);

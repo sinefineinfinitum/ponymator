@@ -64,6 +64,21 @@ final class GraphQuery
     }
 
     /**
+     * @param  int $id
+     * @return array<string, mixed>
+     */
+    public function findEntityById(int $id): ?array
+    {
+        $stmt = $this->pdo->prepare('SELECT * FROM entities WHERE id = :id');
+        $stmt->execute(['id' => $id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($row === false || !is_array($row)) {
+            return null;
+        }
+        return $row;
+    }
+
+    /**
      * @return list<array<string, mixed>>
      */
     public function findMembersByEntity(int $entityId): array
@@ -144,6 +159,8 @@ final class GraphQuery
                     m.member_type AS source_member_type,
                     m.visibility AS source_member_visibility,
                     m.is_static AS source_member_static,
+                    m.declared_type AS source_member_declared_type,
+                    m.return_type AS source_member_return_type,
                     s.fqn AS source_fqn,
                     t.fqn AS target_fqn_resolved
              FROM relationships r
@@ -154,6 +171,22 @@ final class GraphQuery
              ORDER BY r.type, s.fqn'
         );
         $stmt->execute(['target_id' => $targetId]);
+        /** @phpstan-ignore return.type */
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * @return list<array{name: string, declared_type: string|null, default_value: string|null}>
+     */
+    public function findParameterSignatures(int $memberId): array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT name, declared_type, default_value
+             FROM parameters
+             WHERE member_id = :member_id
+             ORDER BY position'
+        );
+        $stmt->execute(['member_id' => $memberId]);
         /** @phpstan-ignore return.type */
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -179,16 +212,27 @@ final class GraphQuery
     /**
      * @return list<array<string, mixed>>
      */
-    public function findTypesByOwner(string $ownerType, int $ownerId): array
+    public function findTypesByOwner(string $ownerType, ?int $ownerId = null): array
     {
-        $stmt = $this->pdo->prepare(
-            'SELECT t.*, e.fqn AS entity_fqn
-             FROM types t
-             LEFT JOIN entities e ON e.id = t.entity_id
-             WHERE t.owner_type = :owner_type AND t.owner_id = :owner_id
-             ORDER BY t.position'
-        );
-        $stmt->execute(['owner_type' => $ownerType, 'owner_id' => $ownerId]);
+        if ($ownerId !== null) {
+            $stmt = $this->pdo->prepare(
+                'SELECT t.*, e.fqn AS entity_fqn
+                 FROM types t
+                 LEFT JOIN entities e ON e.id = t.entity_id
+                 WHERE t.owner_type = :owner_type AND t.owner_id = :owner_id
+                 ORDER BY t.position'
+            );
+            $stmt->execute(['owner_type' => $ownerType, 'owner_id' => $ownerId]);
+        } else {
+            $stmt = $this->pdo->prepare(
+                'SELECT t.*, e.fqn AS entity_fqn
+                 FROM types t
+                 LEFT JOIN entities e ON e.id = t.entity_id
+                 WHERE t.owner_type = :owner_type
+                 ORDER BY t.position'
+            );
+            $stmt->execute(['owner_type' => $ownerType]);
+        }
         /** @phpstan-ignore return.type */
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }

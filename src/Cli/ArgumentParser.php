@@ -157,9 +157,33 @@ final class ArgumentParser
             };
         }
 
-        return new Command('show', $subcommand, $positionalArgs, null, self::OUTPUT_MD, $dbPath, $depth, $helpRequested, false);
+        $namedArgs = self::namedShowArgs($subcommand, $positionalArgs);
+
+        return new Command('show', $subcommand, $positionalArgs, null, self::OUTPUT_MD, $dbPath, $depth, $helpRequested, false, $namedArgs);
     }
 
+
+    /**
+     * @param  string   $subcommand
+     * @param  string[] $positionalArgs
+     * @return array<string, string>
+     */
+    private static function namedShowArgs(string $subcommand, array $positionalArgs): array
+    {
+        if ($subcommand === 'path') {
+            if (count($positionalArgs) < 2) {
+                self::usageExit('show path requires two entity names: <from> <to>');
+            }
+
+            return ['from' => $positionalArgs[0], 'to' => $positionalArgs[1]];
+        }
+
+        if (empty($positionalArgs)) {
+            self::usageExit("show $subcommand requires an entity name");
+        }
+
+        return ['entity' => $positionalArgs[0]];
+    }
 
     private static function parseOutput(string $output): string
     {
