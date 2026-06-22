@@ -16,3 +16,4 @@ temp
 *.db
 .ponymator.json
 .dockerignore
+build

@@ -3,14 +3,16 @@
 namespace SineFine\Ponymator\Cli\Graph;
 
 use SineFine\Ponymator\Cli\Command;
+use SineFine\Ponymator\Cli\Error\ExitCode;
+use SineFine\Ponymator\Config;
 use SineFine\Ponymator\Db\PDOFactory;
 use SineFine\Ponymator\Graph\Experimental\Schema;
 
 class ClearCommand
 {
-    public function execute(Command $cmd): void
+    public function execute(Command $cmd, Config $config): void
     {
-        $factory = new PDOFactory($cmd);
+        $factory = new PDOFactory($cmd, $config);
         $dbPath = $factory->resolvePath();
         $isNew = !file_exists($dbPath);
         $pdo = $factory->connect();
