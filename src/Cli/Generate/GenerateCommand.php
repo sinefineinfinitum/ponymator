@@ -3,7 +3,6 @@
 namespace SineFine\Ponymator\Cli\Generate;
 
 use SineFine\Ponymator\Cli\Command;
-use SineFine\Ponymator\Cli\Error\ConfigException;
 use SineFine\Ponymator\Cli\Error\ErrorOutputFormatter;
 use SineFine\Ponymator\Cli\Error\ExitCode;
 use SineFine\Ponymator\Config;
@@ -16,15 +15,8 @@ use SineFine\Ponymator\Filesystem\Scanner;
 
 final class GenerateCommand
 {
-    public function execute(Command $cmd): void
+    public function execute(Command $cmd, Config $config): void
     {
-        try {
-            $config = new Config($cmd->configPath);
-        } catch (ConfigException $e) {
-            fwrite(STDERR, "Error: " . $e->getMessage() . "\n");
-            exit(ExitCode::CONFIG_ERROR);
-        }
-
         $factory = new GeneratorFactory();
         $generator = $factory->create($config, $cmd->output);
 
